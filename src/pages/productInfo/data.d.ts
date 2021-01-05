@@ -1,16 +1,10 @@
-export type TableListItem = {
-  key: number;
-  disabled?: boolean;
-  href: string;
-  warehouseCode: string;
-  warehouseName: string;
-  owner: string;
-  desc: string;
-  callNo: number;
-  status: number;
-  updatedAt: Date;
-  createdAt: Date;
-  progress: number;
+export type ProductInfoItem = {
+  id?: Number;
+  productCode: string;
+  productName: string;
+  productKind: string;
+  sortVal: string;
+  remarks: string;
 };
 
 export type TableListPagination = {
@@ -29,6 +23,7 @@ export type TableListParams = {
   name?: string;
   desc?: string;
   key?: number;
+  pageNo?: number; 
   pageSize?: number;
   currentPage?: number;
   filter?: Record<string, any[]>;

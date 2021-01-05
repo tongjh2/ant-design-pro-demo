@@ -62,6 +62,12 @@
                 component: './warehouseInfo',
               },
               {
+                name: 'productInfo.list',
+                icon: 'table',
+                path: '/productInfo/list',
+                component: './productInfo',
+              },
+              {
                 component: './404',
               },
             ],

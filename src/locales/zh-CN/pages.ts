@@ -62,4 +62,19 @@ export default {
   'pages.searchTable.tenThousand': '万',
   'pages.searchTable.batchDeletion': '批量删除',
   'pages.searchTable.batchApproval': '批量审批',
+
+  
+  'pages.warehouseInfo.warehouseCode': '仓库编码',
+  'pages.warehouseInfo.warehouseName': '仓库名称',
+  'pages.warehouseInfo.warehouseBelong': '仓库所属',
+  'pages.warehouseInfo.warehouseState': '仓库状态',
+  'pages.warehouseInfo.warehouseLinkman': '仓库联系人',
+  'pages.warehouseInfo.warehouseState0': '未审批',
+  'pages.warehouseInfo.warehouseState1': '已审批',
+  'pages.warehouseInfo.warehouseState2': '禁用申请',
+  'pages.warehouseInfo.warehouseState3': '已禁用',
+
+  
+
+  
 };

@@ -1,5 +1,5 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, message, Input, Drawer } from 'antd';
+import { Button, message,Form, Input, Drawer, Table, Modal,Space  } from 'antd';
 import React, { useState, useRef } from 'react';
 import { useIntl, FormattedMessage } from 'umi';
 import { PageContainer, FooterToolbar } from '@ant-design/pro-layout';
@@ -10,17 +10,17 @@ import type { ProDescriptionsItemProps } from '@ant-design/pro-descriptions';
 import ProDescriptions from '@ant-design/pro-descriptions';
 import type { FormValueType } from './components/UpdateForm';
 import UpdateForm from './components/UpdateForm';
-import type { TableListItem } from './data.d';
-import { queryRule, updateRule, addRule, removeRule } from './service';
+import type { ProductInfoItem } from './data.d';
+import { productInfoList, updateRule, saveProductInfo, removeRule } from './service';
 
 /**
  * 添加节点
  * @param fields
  */
-const handleAdd = async (fields: TableListItem) => {
+const handleAdd = async (fields: ProductInfoItem) => {
   const hide = message.loading('正在添加');
   try {
-    await addRule({ ...fields });
+    await saveProductInfo({ ...fields });
     hide();
     message.success('添加成功');
     return true;
@@ -58,7 +58,7 @@ const handleUpdate = async (fields: FormValueType) => {
  *  删除节点
  * @param selectedRows
  */
-const handleRemove = async (selectedRows: TableListItem[]) => {
+const handleRemove = async (selectedRows: ProductInfoItem[]) => {
   const hide = message.loading('正在删除');
   if (!selectedRows) return true;
   try {
@@ -88,15 +88,15 @@ const TableList: React.FC = () => {
   const [showDetail, setShowDetail] = useState<boolean>(false);
 
   const actionRef = useRef<ActionType>();
-  const [currentRow, setCurrentRow] = useState<TableListItem>();
-  const [selectedRowsState, setSelectedRows] = useState<TableListItem[]>([]);
+  const [currentRow, setCurrentRow] = useState<ProductInfoItem>();
+  const [selectedRowsState, setSelectedRows] = useState<ProductInfoItem[]>([]);
 
   /**
    * 国际化配置
    */
   const intl = useIntl();
 
-  const columns: ProColumns<TableListItem>[] = [
+  const columns: ProColumns<ProductInfoItem>[] = [
     {
       title: (
         <FormattedMessage
@@ -191,7 +191,7 @@ const TableList: React.FC = () => {
 
   return (
     <PageContainer>
-      <ProTable<TableListItem>
+      <ProTable<ProductInfoItem>
         headerTitle={intl.formatMessage({
           id: 'pages.searchTable.title',
           defaultMessage: '查询表格',
@@ -269,7 +269,7 @@ const TableList: React.FC = () => {
         visible={createModalVisible}
         onVisibleChange={handleModalVisible}
         onFinish={async (value) => {
-          const success = await handleAdd(value as TableListItem);
+          const success = await handleAdd(value as ProductInfoItem);
           if (success) {
             handleModalVisible(false);
             if (actionRef.current) {
@@ -324,7 +324,7 @@ const TableList: React.FC = () => {
         closable={false}
       >
         {currentRow?.name && (
-          <ProDescriptions<TableListItem>
+          <ProDescriptions<ProductInfoItem>
             column={2}
             title={currentRow?.name}
             request={async () => ({
@@ -333,7 +333,7 @@ const TableList: React.FC = () => {
             params={{
               id: currentRow?.name,
             }}
-            columns={columns as ProDescriptionsItemProps<TableListItem>[]}
+            columns={columns as ProDescriptionsItemProps<ProductInfoItem>[]}
           />
         )}
       </Drawer>
@@ -341,4 +341,242 @@ const TableList: React.FC = () => {
   );
 };
 
-export default TableList;
+// export default TableList;
+
+class productInfoComponent extends React.Component{
+
+    state = {
+        form:{id:0},
+        params:{
+            pageNo:1,
+            pageSize:10,
+        },
+        data: [],
+        pagination: {
+            total:0,
+            current: 1,
+            pageSize: 10,
+        },
+        loading: false,
+        isModalVisible: false
+    };
+
+    //[isModalVisible, setIsModalVisible] = useState(false);
+
+    // public list:any[] = []
+
+    constructor(props:any) {
+        super(props);
+        this.add = this.add.bind(this);
+        this.edit = this.edit.bind(this);
+        this.handleOk = this.handleOk.bind(this);
+        this.handleCancel = this.handleCancel.bind(this);
+    }
+
+    public componentDidMount() {
+        this.getProductInfoList()
+    }
+
+    handleTableChange = (pagination:any, filters:any, sorter:any) => {
+        console.log({
+          sortField: sorter.field,
+          sortOrder: sorter.order,
+          pagination,
+          ...filters,
+        });
+        this.state.params.pageNo = pagination.current        
+        this.getProductInfoList()
+      };
+
+    private async getProductInfoList(){
+        this.setState({ loading: true });
+        const { params } = this.state;
+        let res = await productInfoList(params)
+        this.setState({
+            loading: false,
+            data: res.list,
+            pagination: {
+                total: res.count,
+                current: res.pageNo,
+                pageSize: res.pageSize
+            }
+        })
+    }
+
+    public add(){
+        this.setState({
+            form: {},
+            isModalVisible:true
+        })
+    }
+
+    public edit(item:any){
+        console.log(item)
+        this.setState({
+            form: Object.assign({}, item),
+            isModalVisible:true
+        })
+    }
+
+    save = async(values:any)=>{
+        console.log(values)
+        let form = Object.assign({},values)
+        form.id = this.state.form.id
+        form['parent.id'] = ''
+        try {
+            const res = await saveProductInfo(form)
+            if(res.code===200){
+                this.setState({isModalVisible:false})
+                message.success('保存成功')
+            }else{
+                message.error(res.message)
+            }
+            console.log(res)
+        } catch (error) {
+            console.log(error)
+            
+        }
+        
+    }
+
+    
+
+    public handleOk(values: any){
+        // this.setState({isModalVisible:false})
+        console.log(values)
+    }
+    public handleCancel(){
+        this.setState({isModalVisible:false})
+    }
+
+    public render() {
+        const tailLayout = {
+            wrapperCol: { offset: 8, span: 16 },
+          };
+
+        const layout = {
+            labelCol: { span: 4 },
+            wrapperCol: { span: 20 },
+        };
+        const onFinish = (values: any) => {
+            console.log('Success:', values);
+          };
+        
+          const onFinishFailed = (errorInfo: any) => {
+            console.log('Failed:', errorInfo);
+          };
+          
+        const columns = [
+            {
+                title: '产品编码',
+                dataIndex: 'productCode',
+                key: 'productCode',
+            },
+            {
+                title: '产品名称',
+                dataIndex: 'productName',
+                key: 'productName',
+            },
+            {
+                title: '产品种类',
+                dataIndex: 'productState',
+                key: 'productState',
+            },
+            {
+                title: '操作',
+                dataIndex: 'productState',
+                key: 'productState',
+                render: (_:any, record:any)=> (
+                    <Space size="middle">
+                        <a onClick={this.edit.bind(this,record)}>编辑</a>
+                    </Space>
+                )
+            },
+        ];
+
+        const { form, data, pagination, loading, isModalVisible } = this.state; 
+        console.log(pagination)
+
+
+
+        return <div>
+            <div style={{ marginBottom: 16 }}>
+                <Button type="primary" onClick={this.add}  loading={loading}>
+                    <PlusOutlined />
+                    新增
+                </Button>
+                <span style={{ marginLeft: 8 }}>               
+                </span>
+            </div>
+             
+            <Table 
+                dataSource={data} 
+                columns={columns} 
+                rowKey="id"
+                loading={loading} 
+                pagination={pagination}
+                onChange={this.handleTableChange}
+            />
+
+            <Modal title="新增" visible={isModalVisible} onOk={this.handleOk} onCancel={this.handleCancel}>
+                <Form
+                    {...layout}
+                    name="form"
+                    initialValues={form}
+                    onFinish={this.save}
+                    onFinishFailed={onFinishFailed}
+                    >
+                    <Form.Item
+                        label="产品编码"
+                        name="productCode"
+                        rules={[{ required: true, message: '请输入产品编码!' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="产品名称"
+                        name="productName"
+                        rules={[{ required: true, message: '请输入产品名称!' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="产品种类"
+                        name="productKind"
+                        rules={[{ required: true, message: '请输入产品种类!' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        label="排序"
+                        name="sortVal"
+                        rules={[{ required: true, message: '请输入产品排序!' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        label="备注信息"
+                        name="remarks"
+                        rules={[{ required: true, message: '请输入产品备注信息!' }]}
+                    >
+                        <Input.TextArea />
+                    </Form.Item>
+
+                    <Form.Item {...tailLayout}>
+                        <Button type="primary" htmlType="submit">
+                        保存
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </Modal>
+        </div>;
+    }
+
+
+
+}
+
+
+export default productInfoComponent

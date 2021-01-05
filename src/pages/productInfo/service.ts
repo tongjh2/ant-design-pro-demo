@@ -1,9 +1,8 @@
 import request from '@/utils/request';
-import type { TableListParams, TableListItem } from './data.d';
+import type { TableListParams, ProductInfoItem } from './data.d';
 
-export async function queryRule(params?: TableListParams) {
-  //   /api/rule
-  return request('/jeeapp/a/m/warehouse/warehouseInfo/list', {
+export async function productInfoList(params?: TableListParams) {
+  return request('/jeeapp/a/m/product/productInfo/list', {
     params,
   });
 }
@@ -18,12 +17,16 @@ export async function removeRule(params: { key: number[] }) {
   });
 }
 
-export async function addRule(params: TableListItem) {
-  return request('/api/rule', {
+export async function saveProductInfo(params: ProductInfoItem) {
+  return request('/jeeapp/a/m/product/productInfo/save', {
     method: 'POST',
     data: {
       ...params,
       method: 'post',
+    },
+    requestType: 'form',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
   });
 }
