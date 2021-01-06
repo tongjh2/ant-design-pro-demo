@@ -365,12 +365,17 @@ class productInfoComponent extends React.Component{
 
     // public list:any[] = []
 
+    private formObj:any
+    
+
     constructor(props:any) {
         super(props);
         this.add = this.add.bind(this);
         this.edit = this.edit.bind(this);
         this.handleOk = this.handleOk.bind(this);
         this.handleCancel = this.handleCancel.bind(this);
+        // const [formObj] = Form.useForm();
+        // this.formObj = formObj;
     }
 
     public componentDidMount() {
@@ -408,6 +413,13 @@ class productInfoComponent extends React.Component{
             form: {},
             isModalVisible:true
         })
+
+        // this.props.form.resetFields();
+        this.formObj.resetFields();
+
+        // if (actionRef.current) {
+        //   actionRef.current.reload();
+        // }
     }
 
     public edit(item:any){
@@ -453,6 +465,8 @@ class productInfoComponent extends React.Component{
         const tailLayout = {
             wrapperCol: { offset: 8, span: 16 },
           };
+
+        // const [formObj] = Form.useForm();
 
         const layout = {
             labelCol: { span: 4 },
@@ -522,6 +536,7 @@ class productInfoComponent extends React.Component{
                 <Form
                     {...layout}
                     name="form"
+                    // form={formObj}
                     initialValues={form}
                     onFinish={this.save}
                     onFinishFailed={onFinishFailed}
