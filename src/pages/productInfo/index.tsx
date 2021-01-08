@@ -414,8 +414,8 @@ class productInfoComponent extends React.Component{
             isModalVisible:true
         })
 
-        // this.props.form.resetFields();
-        this.formObj.resetFields();
+        // this.state.form.resetFields();
+        // this.formObj.resetFields();
 
         // if (actionRef.current) {
         //   actionRef.current.reload();

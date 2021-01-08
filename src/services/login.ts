@@ -8,9 +8,18 @@ export type LoginParamsType = {
 };
 
 export async function fakeAccountLogin(params: LoginParamsType) {
-  return request('/api/login/account', {
+  // return request('/api/login/account', {
+  //   method: 'POST',
+  //   data: params,
+  // });
+
+  return request('/jeeapp/a/login', {
     method: 'POST',
     data: params,
+    requestType: 'form',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
   });
 }
 

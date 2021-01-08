@@ -38,14 +38,14 @@
                 name: 'admin',
                 icon: 'crown',
                 component: './Admin',
-                authority: ['admin'],
+                // authority: ['admin'],
                 routes: [
                   {
                     path: '/admin/sub-page',
                     name: 'sub-page',
                     icon: 'smile',
                     component: './Welcome',
-                    authority: ['admin'],
+                    // authority: ['admin'],
                   },
                 ],
               },
@@ -67,6 +67,31 @@
                 path: '/productInfo/list',
                 component: './productInfo',
               },
+
+              // {
+              //   path: '/invoiceClause/list',
+              //   name: 'invoiceClause.list',
+              //   icon: 'smile',
+              //   component: './invoiceClause',
+              // },
+             
+
+
+              {
+                path: '/base',
+                name: 'base',
+                icon: 'crown',
+                routes: [
+                  {
+                    path: '/base/invoiceClause/list',
+                    name: 'invoiceClause.list',
+                    icon: 'smile',
+                    component: './base/invoiceClause',
+                  },
+                ],
+              },
+
+
               {
                 component: './404',
               },

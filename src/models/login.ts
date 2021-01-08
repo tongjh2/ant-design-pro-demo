@@ -39,6 +39,31 @@ const Model: LoginModelType = {
         type: 'changeLoginStatus',
         payload: response,
       });
+      console.log(payload, response)
+      if(payload.username === 'zhujinliang'){
+        message.success('🎉  登录成功！')
+        const urlParams = new URL(window.location.href);
+        const params = getPageQuery();
+        let { redirect } = params as { redirect: string };
+        if (redirect) {
+          const redirectUrlParams = new URL(redirect);
+          if (redirectUrlParams.origin === urlParams.origin) {
+            redirect = redirect.substr(urlParams.origin.length);
+            if (redirect.match(/^\/.*#/)) {
+              redirect = redirect.substr(redirect.indexOf('#') + 1);
+            }
+          } else {
+            window.location.href = '/';
+            return;
+          }
+        }
+        history.replace(redirect || '/');
+
+
+      }else{
+        message.error('用户名或密码错误')
+      }
+      return;
       // Login successfully
       if (response.status === 'ok') {
         const urlParams = new URL(window.location.href);

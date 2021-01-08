@@ -52,4 +52,6 @@ export default {
 
   'menu.warehouseInfo.list': '仓库管理',
   'menu.productInfo.list': '产品管理',
+  'menu.base.invoiceClause.list': '发票项目管理',
+  'menu.base': '基础数据',
 };
