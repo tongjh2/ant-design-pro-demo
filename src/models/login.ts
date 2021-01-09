@@ -39,8 +39,9 @@ const Model: LoginModelType = {
         type: 'changeLoginStatus',
         payload: response,
       });
+
       console.log(payload, response)
-      if(payload.username === 'zhujinliang'){
+      if(response.status===0){
         message.success('🎉  登录成功！')
         const urlParams = new URL(window.location.href);
         const params = getPageQuery();
@@ -58,10 +59,8 @@ const Model: LoginModelType = {
           }
         }
         history.replace(redirect || '/');
-
-
       }else{
-        message.error('用户名或密码错误')
+        message.error(response.message)
       }
       return;
       // Login successfully
@@ -88,7 +87,7 @@ const Model: LoginModelType = {
 
     logout() {
       const { redirect } = getPageQuery();
-      // Note: There may be security issues, please note
+      // Note: There may be security issues, please note      
       if (window.location.pathname !== '/user/login' && !redirect) {
         history.replace({
           pathname: '/user/login',
@@ -102,7 +101,8 @@ const Model: LoginModelType = {
 
   reducers: {
     changeLoginStatus(state, { payload }) {
-      setAuthority(payload.currentAuthority);
+      console.log(payload)
+      setAuthority(payload.data && payload.data.Authorization);
       return {
         ...state,
         status: payload.status,

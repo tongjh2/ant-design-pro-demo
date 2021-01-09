@@ -7,13 +7,8 @@
  */
 export default {
   dev: {
-    '/jeeapp/a/m/': {
-      target: 'http://localhost:8080',
-      changeOrigin: true,
-      pathRewrite: { '^': '' },
-    },
-    '/jeeapp/a/': {
-      target: 'http://localhost:8080',
+    '/v1/': {
+      target: 'http://mrry.ranyuxinxi.cn',
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },

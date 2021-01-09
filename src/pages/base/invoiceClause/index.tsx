@@ -221,15 +221,17 @@ const TableList: React.FC = () => {
     const getProductInfoList = async()=>{
         let res = await productInfoList({})
         data = (res.list||[])
-        this.setState({
-            loading: false,
-            data: res.list,
-            pagination: {
-                total: res.count,
-                current: res.pageNo,
-                pageSize: res.pageSize
-            }
-        })
+
+        console.log(this)
+        // this.setState({
+        //     loading: false,
+        //     data: res.list,
+        //     pagination: {
+        //         total: res.count,
+        //         current: res.pageNo,
+        //         pageSize: res.pageSize
+        //     }
+        // })
     }
 
     let data:any[] = []
@@ -260,6 +262,7 @@ const TableList: React.FC = () => {
                 <span style={{ marginLeft: 8 }}>               
                 </span>
             </div>
+
 
             <Table 
                 dataSource={data} 

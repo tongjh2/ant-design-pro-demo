@@ -91,6 +91,20 @@
                 ],
               },
 
+              {
+                path: '/system',
+                name: 'system',
+                icon: 'crown',
+                routes: [
+                  {
+                    path: '/system/ad/list',
+                    name: 'ad.list',
+                    icon: 'smile',
+                    component: './system/ad',
+                  },
+                ],
+              },
+
 
               {
                 component: './404',

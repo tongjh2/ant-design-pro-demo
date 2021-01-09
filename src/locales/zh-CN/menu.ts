@@ -54,4 +54,6 @@ export default {
   'menu.productInfo.list': '产品管理',
   'menu.base.invoiceClause.list': '发票项目管理',
   'menu.base': '基础数据',
+  'menu.system': '系统设置',
+  'menu.system.ad.list': '广告管理',
 };
