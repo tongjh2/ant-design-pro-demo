@@ -11,342 +11,19 @@ import ProDescriptions from '@ant-design/pro-descriptions';
 import type { FormValueType } from './components/UpdateForm';
 import UpdateForm from './components/UpdateForm';
 import type { ProductInfoItem } from './data.d';
-import { productInfoList, updateRule, saveProductInfo, removeRule } from './service';
-
-/**
- * 添加节点
- * @param fields
- */
-const handleAdd = async (fields: ProductInfoItem) => {
-  const hide = message.loading('正在添加');
-  try {
-    await saveProductInfo({ ...fields });
-    hide();
-    message.success('添加成功');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('添加失败请重试！');
-    return false;
-  }
-};
-
-/**
- * 更新节点
- * @param fields
- */
-const handleUpdate = async (fields: FormValueType) => {
-  const hide = message.loading('正在配置');
-  try {
-    await updateRule({
-      name: fields.name,
-      desc: fields.desc,
-      key: fields.key,
-    });
-    hide();
-
-    message.success('配置成功');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('配置失败请重试！');
-    return false;
-  }
-};
-
-/**
- *  删除节点
- * @param selectedRows
- */
-const handleRemove = async (selectedRows: ProductInfoItem[]) => {
-  const hide = message.loading('正在删除');
-  if (!selectedRows) return true;
-  try {
-    await removeRule({
-      key: selectedRows.map((row) => row.key),
-    });
-    hide();
-    message.success('删除成功，即将刷新');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('删除失败，请重试');
-    return false;
-  }
-};
-
-const TableList: React.FC = () => {
-  /**
-   * 新建窗口的弹窗
-   */
-  const [createModalVisible, handleModalVisible] = useState<boolean>(false);
-  /**
-   * 分布更新窗口的弹窗
-   */
-  const [updateModalVisible, handleUpdateModalVisible] = useState<boolean>(false);
-
-  const [showDetail, setShowDetail] = useState<boolean>(false);
-
-  const actionRef = useRef<ActionType>();
-  const [currentRow, setCurrentRow] = useState<ProductInfoItem>();
-  const [selectedRowsState, setSelectedRows] = useState<ProductInfoItem[]>([]);
-
-  /**
-   * 国际化配置
-   */
-  const intl = useIntl();
-
-  const columns: ProColumns<ProductInfoItem>[] = [
-    {
-      title: (
-        <FormattedMessage
-          id="pages.warehouseInfo.warehouseCode"
-          defaultMessage="仓库编码"
-        />
-      ),
-      dataIndex: 'warehouseCode',
-      tip: '仓库编码',
-      render: (dom, entity) => {
-        return (
-          <a
-            onClick={() => {
-              setCurrentRow(entity);
-              setShowDetail(true);
-            }}
-          >
-            {dom}
-          </a>
-        );
-      },
-    },
-    {
-      title: <FormattedMessage id="pages.warehouseInfo.warehouseName" defaultMessage="仓库名称" />,
-      dataIndex: 'warehouseName',
-      valueType: 'textarea',
-    },
-    {
-      title: <FormattedMessage id="pages.warehouseInfo.warehouseBelong" defaultMessage="仓库所属" />,
-      dataIndex: 'warehouseBelong',
-      sorter: true,
-      hideInForm: true,
-      renderText: (val: string) =>
-        `${val==='1'?'厂内':'厂外'}`,
-    },
-    {
-      title: <FormattedMessage id="pages.warehouseInfo.warehouseState" defaultMessage="仓库状态" />,
-      dataIndex: 'warehouseState',
-      hideInForm: true,
-      valueEnum: {
-        0: {
-          text: (
-            <FormattedMessage id="pages.warehouseInfo.warehouseState0" defaultMessage="未审批" />
-          ),
-          status: 'Default',
-        },
-        1: {
-          text: (
-            <FormattedMessage id="pages.warehouseInfo.warehouseState1" defaultMessage="已审批" />
-          ),
-          status: 'Processing',
-        },
-        2: {
-          text: (
-            <FormattedMessage id="pages.warehouseInfo.warehouseState2" defaultMessage="禁用申请" />
-          ),
-          status: 'Success',
-        },
-        3: {
-          text: (
-            <FormattedMessage id="pages.warehouseInfo.warehouseState3" defaultMessage="已禁用" />
-          ),
-          status: 'Error',
-        },
-      },
-    },
-    {
-      title: <FormattedMessage id="pages.warehouseInfo.warehouseLinkman" defaultMessage="仓库联系人" />,
-      dataIndex: 'warehouseLinkman',
-      valueType: 'textarea',
-    },
-    {
-      title: <FormattedMessage id="pages.searchTable.titleOption" defaultMessage="操作" />,
-      dataIndex: 'option',
-      valueType: 'option',
-      render: (_, record) => [
-        <a
-          key="config"
-          onClick={() => {
-            handleUpdateModalVisible(true);
-            setCurrentRow(record);
-          }}
-        >
-          <FormattedMessage id="pages.searchTable.config" defaultMessage="配置" />
-        </a>,
-        <a key="subscribeAlert" href="https://procomponents.ant.design/">
-          <FormattedMessage id="pages.searchTable.subscribeAlert" defaultMessage="订阅警报" />
-        </a>,
-      ],
-    },
-  ];
-
-  return (
-    <PageContainer>
-      <ProTable<ProductInfoItem>
-        headerTitle={intl.formatMessage({
-          id: 'pages.searchTable.title',
-          defaultMessage: '查询表格',
-        })}
-        actionRef={actionRef}
-        rowKey="id"
-        search={{
-          labelWidth: 120,
-        }}
-        toolBarRender={() => [
-          <Button
-            type="primary"
-            key="primary"
-            onClick={() => {
-              handleModalVisible(true);
-            }}
-          >
-            <PlusOutlined /> <FormattedMessage id="pages.searchTable.new" defaultMessage="新建" />
-          </Button>,
-        ]}
-        request={async(params, sorter, filter) => {
-          const res = await queryRule({ ...params, sorter, filter })
-          return {
-            data: res.list,
-            success: true,
-            total:res.count
-          }
-        }}
-        columns={columns}
-        rowSelection={{
-          onChange: (_, selectedRows) => {
-            setSelectedRows(selectedRows);
-          },
-        }}
-      />
-      {selectedRowsState?.length > 0 && (
-        <FooterToolbar
-          extra={
-            <div>
-              <FormattedMessage id="pages.searchTable.chosen" defaultMessage="已选择" />{' '}
-              <a style={{ fontWeight: 600 }}>{selectedRowsState.length}</a>{' '}
-              <FormattedMessage id="pages.searchTable.item" defaultMessage="项" />
-              &nbsp;&nbsp;
-              <span>
-                <FormattedMessage
-                  id="pages.searchTable.totalServiceCalls"
-                  defaultMessage="服务调用次数总计"
-                />{' '}
-                {selectedRowsState.reduce((pre, item) => pre + item.callNo, 0)}{' '}
-                <FormattedMessage id="pages.searchTable.tenThousand" defaultMessage="万" />
-              </span>
-            </div>
-          }
-        >
-          <Button
-            onClick={async () => {
-              await handleRemove(selectedRowsState);
-              setSelectedRows([]);
-              actionRef.current?.reloadAndRest?.();
-            }}
-          >
-            <FormattedMessage id="pages.searchTable.batchDeletion" defaultMessage="批量删除" />
-          </Button>
-          <Button type="primary">
-            <FormattedMessage id="pages.searchTable.batchApproval" defaultMessage="批量审批" />
-          </Button>
-        </FooterToolbar>
-      )}
-      <ModalForm
-        title={intl.formatMessage({
-          id: 'pages.searchTable.createForm.newRule',
-          defaultMessage: '新建规则',
-        })}
-        width="400px"
-        visible={createModalVisible}
-        onVisibleChange={handleModalVisible}
-        onFinish={async (value) => {
-          const success = await handleAdd(value as ProductInfoItem);
-          if (success) {
-            handleModalVisible(false);
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
-          }
-        }}
-      >
-        <ProFormText
-          rules={[
-            {
-              required: true,
-              message: (
-                <FormattedMessage
-                  id="pages.searchTable.ruleName"
-                  defaultMessage="规则名称为必填项"
-                />
-              ),
-            },
-          ]}
-          width="md"
-          name="name"
-        />
-        <ProFormTextArea width="md" name="desc" />
-      </ModalForm>
-      <UpdateForm
-        onSubmit={async (value) => {
-          const success = await handleUpdate(value);
-          if (success) {
-            handleUpdateModalVisible(false);
-            setCurrentRow(undefined);
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
-          }
-        }}
-        onCancel={() => {
-          handleUpdateModalVisible(false);
-          setCurrentRow(undefined);
-        }}
-        updateModalVisible={updateModalVisible}
-        values={currentRow || {}}
-      />
-
-      <Drawer
-        width={600}
-        visible={showDetail}
-        onClose={() => {
-          setCurrentRow(undefined);
-          setShowDetail(false);
-        }}
-        closable={false}
-      >
-        {currentRow?.name && (
-          <ProDescriptions<ProductInfoItem>
-            column={2}
-            title={currentRow?.name}
-            request={async () => ({
-              data: currentRow || {},
-            })}
-            params={{
-              id: currentRow?.name,
-            }}
-            columns={columns as ProDescriptionsItemProps<ProductInfoItem>[]}
-          />
-        )}
-      </Drawer>
-    </PageContainer>
-  );
-};
-
-// export default TableList;
+import { adList, updateRule, addAd, removeRule } from './service';
 
 class productInfoComponent extends React.Component{
 
     state = {
-        form:{id:0},
+        formValues:{
+          id:0,
+          name:'',
+          type:'',
+          position:'',
+          sort:'',
+          status:'',
+        },
         params:{
             pageNo:1,
             pageSize:10,
@@ -361,11 +38,8 @@ class productInfoComponent extends React.Component{
         isModalVisible: false
     };
 
-    //[isModalVisible, setIsModalVisible] = useState(false);
 
-    // public list:any[] = []
-
-    private formObj:any
+    formRef = React.createRef();
     
 
     constructor(props:any) {
@@ -374,12 +48,10 @@ class productInfoComponent extends React.Component{
         this.edit = this.edit.bind(this);
         this.handleOk = this.handleOk.bind(this);
         this.handleCancel = this.handleCancel.bind(this);
-        // const [formObj] = Form.useForm();
-        // this.formObj = formObj;
     }
 
     public componentDidMount() {
-        this.getProductInfoList()
+        this.getAdList()
     }
 
     handleTableChange = (pagination:any, filters:any, sorter:any) => {
@@ -390,63 +62,63 @@ class productInfoComponent extends React.Component{
           ...filters,
         });
         this.state.params.pageNo = pagination.current        
-        this.getProductInfoList()
+        this.getAdList()
       };
 
-    private async getProductInfoList(){
+    private async getAdList(){
         this.setState({ loading: true });
         const { params } = this.state;
-        let res = await productInfoList(params)
+        let res = await adList(params)
+        console.log(res)
         this.setState({
             loading: false,
-            data: res.list,
+            data: res.data.data||[],
             pagination: {
-                total: res.count,
-                current: res.pageNo,
-                pageSize: res.pageSize
+                total: res.data.pagenation.total,
+                current: res.data.pagenation.page,
+                pageSize: res.data.pagenation.page_size
             }
         })
     }
 
     public add(){
         this.setState({
-            form: {},
+            formValues: {},
             isModalVisible:true
         })
 
-        // this.state.form.resetFields();
-        // this.formObj.resetFields();
-
-        // if (actionRef.current) {
-        //   actionRef.current.reload();
-        // }
+        // this.formRef.current.resetFields();
     }
 
     public edit(item:any){
         console.log(item)
         this.setState({
-            form: Object.assign({}, item),
+            formValues: Object.assign({}, item),
             isModalVisible:true
         })
     }
 
     save = async(values:any)=>{
+      const hide = message.loading('正在提交');
         console.log(values)
         let form = Object.assign({},values)
-        form.id = this.state.form.id
-        form['parent.id'] = ''
+        form.id = this.state.formValues.id
+
+        console.log(values)
         try {
-            const res = await saveProductInfo(form)
-            if(res.code===200){
+            const res = await addAd(form)
+            if(res.status===0){
                 this.setState({isModalVisible:false})
                 message.success('保存成功')
+                this.getAdList()
             }else{
                 message.error(res.message)
             }
+            hide()
             console.log(res)
         } catch (error) {
             console.log(error)
-            
+            hide()            
         }
         
     }
@@ -456,6 +128,12 @@ class productInfoComponent extends React.Component{
     public handleOk(values: any){
         // this.setState({isModalVisible:false})
         console.log(values)
+        // this.formRef.current.resetFields();
+
+        this.formRef.current.validateFields((err, values) => {
+            if (err) return;//检查Form表单填写的数据是否满足rules的要求
+            this.props.onOk(values);//调用父组件给的onOk方法并传入Form的参数。
+        })
     }
     public handleCancel(){
         this.setState({isModalVisible:false})
@@ -466,35 +144,44 @@ class productInfoComponent extends React.Component{
             wrapperCol: { offset: 8, span: 16 },
           };
 
-        // const [formObj] = Form.useForm();
-
         const layout = {
             labelCol: { span: 4 },
             wrapperCol: { span: 20 },
         };
+
         const onFinish = (values: any) => {
             console.log('Success:', values);
           };
         
-          const onFinishFailed = (errorInfo: any) => {
-            console.log('Failed:', errorInfo);
-          };
+        const onFinishFailed = (errorInfo: any) => {
+          console.log('Failed:', errorInfo);
+        };
           
         const columns = [
             {
-                title: '产品编码',
-                dataIndex: 'productCode',
-                key: 'productCode',
+                title: '广告名称',
+                dataIndex: 'name',
+                key: 'name',
             },
             {
-                title: '产品名称',
-                dataIndex: 'productName',
-                key: 'productName',
+                title: '类型',
+                dataIndex: 'type',
+                key: 'type',
             },
             {
-                title: '产品种类',
-                dataIndex: 'productState',
-                key: 'productState',
+                title: '广告位置',
+                dataIndex: 'position',
+                key: 'position',
+            },
+            {
+                title: '排序',
+                dataIndex: 'sort',
+                key: 'sort',
+            },
+            {
+                title: '状态',
+                dataIndex: 'status',
+                key: 'status',
             },
             {
                 title: '操作',
@@ -508,8 +195,8 @@ class productInfoComponent extends React.Component{
             },
         ];
 
-        const { form, data, pagination, loading, isModalVisible } = this.state; 
-        console.log(pagination)
+        const { formValues, data, pagination, loading, isModalVisible } = this.state; 
+        console.log(formValues)
 
 
 
@@ -526,57 +213,58 @@ class productInfoComponent extends React.Component{
             <Table 
                 dataSource={data} 
                 columns={columns} 
-                rowKey="id"
+                // rowKey="id"
+                rowKey={record => record.id}
                 loading={loading} 
                 pagination={pagination}
                 onChange={this.handleTableChange}
             />
 
-            <Modal title="新增" visible={isModalVisible} onOk={this.handleOk} onCancel={this.handleCancel}>
+            {isModalVisible && <Modal title="新增" visible={isModalVisible} onOk={this.handleOk} onCancel={this.handleCancel}>
                 <Form
                     {...layout}
-                    name="form"
-                    // form={formObj}
-                    initialValues={form}
+                    ref={this.formRef} 
+                    name="control-ref"
+                    initialValues={formValues}
                     onFinish={this.save}
                     onFinishFailed={onFinishFailed}
                     >
                     <Form.Item
-                        label="产品编码"
-                        name="productCode"
-                        rules={[{ required: true, message: '请输入产品编码!' }]}
+                        label="广告名称"
+                        name="name"
+                        rules={[{ required: true, message: '请输入广告名称!' }]}
                     >
                         <Input />
                     </Form.Item>
 
                     <Form.Item
-                        label="产品名称"
-                        name="productName"
-                        rules={[{ required: true, message: '请输入产品名称!' }]}
+                        label="类型"
+                        name="type"
+                        rules={[{ required: true, message: '请输入类型!' }]}
                     >
                         <Input />
                     </Form.Item>
 
                     <Form.Item
-                        label="产品种类"
-                        name="productKind"
-                        rules={[{ required: true, message: '请输入产品种类!' }]}
+                        label="广告位置"
+                        name="position"
+                        rules={[{ required: true, message: '请输入广告位置!' }]}
                     >
                         <Input />
                     </Form.Item>
                     <Form.Item
                         label="排序"
-                        name="sortVal"
-                        rules={[{ required: true, message: '请输入产品排序!' }]}
+                        name="sort"
+                        rules={[{ required: true, message: '请输入排序!' }]}
                     >
                         <Input />
                     </Form.Item>
                     <Form.Item
-                        label="备注信息"
-                        name="remarks"
-                        rules={[{ required: true, message: '请输入产品备注信息!' }]}
+                        label="状态"
+                        name="status"
+                        rules={[{ required: true, message: '请输入状态!' }]}
                     >
-                        <Input.TextArea />
+                        <Input />
                     </Form.Item>
 
                     <Form.Item {...tailLayout}>
@@ -585,7 +273,7 @@ class productInfoComponent extends React.Component{
                         </Button>
                     </Form.Item>
                 </Form>
-            </Modal>
+            </Modal>}
         </div>;
     }
 

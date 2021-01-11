@@ -1,8 +1,8 @@
 import request from '@/utils/request';
 import type { TableListParams, ProductInfoItem } from './data.d';
 
-export async function productInfoList(params?: TableListParams) {
-  return request('/jeeapp/a/m/product/productInfo/list', {
+export async function adList(params?: TableListParams) {
+  return request('/v1/ad/list', {
     params,
   });
 }
@@ -17,8 +17,8 @@ export async function removeRule(params: { key: number[] }) {
   });
 }
 
-export async function saveProductInfo(params: ProductInfoItem) {
-  return request('/jeeapp/a/m/product/productInfo/save', {
+export async function addAd(params: ProductInfoItem) {
+  return request('/v1/ad/add', {
     method: 'POST',
     data: {
       ...params,
