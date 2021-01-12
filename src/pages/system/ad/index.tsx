@@ -1,17 +1,10 @@
-import { PlusOutlined } from '@ant-design/icons';
-import { Button, message,Form, Input, Drawer, Table, Modal,Space  } from 'antd';
-import React, { useState, useRef } from 'react';
-import { useIntl, FormattedMessage } from 'umi';
-import { PageContainer, FooterToolbar } from '@ant-design/pro-layout';
-import type { ProColumns, ActionType } from '@ant-design/pro-table';
-import ProTable from '@ant-design/pro-table';
-import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
-import type { ProDescriptionsItemProps } from '@ant-design/pro-descriptions';
-import ProDescriptions from '@ant-design/pro-descriptions';
-import type { FormValueType } from './components/UpdateForm';
-import UpdateForm from './components/UpdateForm';
-import type { ProductInfoItem } from './data.d';
-import { adList, updateRule, addAd, removeRule } from './service';
+import { PlusOutlined, UploadOutlined, InboxOutlined } from '@ant-design/icons';
+import { Button, message, Form, Input, Select, Table, Modal,Space,Popconfirm,Card,Row, Col,Upload   } from 'antd';
+import React from 'react';
+import type { AdItem } from './data.d';
+import { adList, addAd, adDelete } from './service';
+import { FormInstance } from 'antd/lib/form';
+const { Option } = Select;
 
 class productInfoComponent extends React.Component{
 
@@ -21,10 +14,15 @@ class productInfoComponent extends React.Component{
           name:'',
           type:'',
           position:'',
+          content:'',
+          content1:'',
+          content2:'',
           sort:'',
           status:'',
         },
         params:{
+            position:'',
+            status:'',
             pageNo:1,
             pageSize:10,
         },
@@ -38,9 +36,8 @@ class productInfoComponent extends React.Component{
         isModalVisible: false
     };
 
-
-    formRef = React.createRef();
-    
+    formRef  = React.createRef<FormInstance>()    
+    fileList:any[] = []
 
     constructor(props:any) {
         super(props);
@@ -65,11 +62,16 @@ class productInfoComponent extends React.Component{
         this.getAdList()
       };
 
+    search = (values:any)=>{
+        this.state.params = Object.assign(this.state.params,values)
+        this.state.params.pageNo = 1
+        this.getAdList()
+    }
+
     private async getAdList(){
         this.setState({ loading: true });
         const { params } = this.state;
         let res = await adList(params)
-        console.log(res)
         this.setState({
             loading: false,
             data: res.data.data||[],
@@ -92,6 +94,20 @@ class productInfoComponent extends React.Component{
 
     public edit(item:any){
         console.log(item)
+        let content = JSON.parse(item.content||'[]')
+        item.content1 = content.content1;
+        item.content2 = content.content2;
+
+        this.fileList = []
+        if(item.content1){
+            this.fileList = [{
+                uid: this.fileList.length+1,
+                name: "banner",
+                status: 'done',
+                url: item.content1
+            }]
+        }
+
         this.setState({
             formValues: Object.assign({}, item),
             isModalVisible:true
@@ -103,7 +119,15 @@ class productInfoComponent extends React.Component{
         console.log(values)
         let form = Object.assign({},values)
         form.id = this.state.formValues.id
-
+        if(this.fileList.length>0){
+            let [img] = this.fileList
+            form.content1 = img.url
+        }
+        let content = {
+            content1:form.content1,
+            content2:form.content2,
+        }
+        form.content = JSON.stringify(content); 
         console.log(values)
         try {
             const res = await addAd(form)
@@ -123,38 +147,70 @@ class productInfoComponent extends React.Component{
         
     }
 
-    
-
-    public handleOk(values: any){
-        // this.setState({isModalVisible:false})
-        console.log(values)
-        // this.formRef.current.resetFields();
-
-        this.formRef.current.validateFields((err, values) => {
-            if (err) return;//检查Form表单填写的数据是否满足rules的要求
-            this.props.onOk(values);//调用父组件给的onOk方法并传入Form的参数。
-        })
+    handleOk = async (event:React.MouseEvent<HTMLElement, MouseEvent>) => {
+        event.preventDefault()
+        try {
+          const values = await this.formRef.current.validateFields();
+          this.save(values);
+        } catch (errorInfo) {
+          console.log('Failed:', errorInfo);
+          message.warn('提交校验失败')
+        }
     }
+
+    delete = async(item:AdItem)=>{
+        try { 
+            await adDelete(item.id||0);
+            message.success('操作成功')
+            this.getAdList()
+        } catch (errorInfo) {
+            console.log('Failed:', errorInfo);
+            message.warn('操作失败')
+        }
+    }
+    
     public handleCancel(){
         this.setState({isModalVisible:false})
     }
 
+    upload = (e:any)=>{
+        console.log(e)
+        if(e.file.status==='done'){
+            this.fileList = [{
+                uid: this.fileList.length+1,
+                name: e.file.name,
+                status: 'done',
+                url: e.file.response.data.url
+            }]  
+            let formValues = Object.assign({},this.state.formValues,{content1:e.file.response.data.url})
+            this.setState({formValues,isModalVisible:true},()=>{
+                console.log(formValues.content1)
+            })
+            console.log(this.fileList, formValues)
+        }
+    }
+
+    removeUpload = (e:any) => {
+        console.log(e)
+        this.fileList = []
+        let formValues = Object.assign({},this.state.formValues,{content1:''})
+        // this.setState({formValues,isModalVisible:true},()=>{
+        //     console.log(formValues.content1)
+        // })
+        this.state.formValues = formValues
+        this.setState(function(prevState,props){
+            return {formValues}
+        },()=>{
+            console.log(this.state.formValues)
+        })
+        console.log(this.fileList, formValues)
+    }
+
     public render() {
-        const tailLayout = {
-            wrapperCol: { offset: 8, span: 16 },
-          };
 
         const layout = {
             labelCol: { span: 4 },
             wrapperCol: { span: 20 },
-        };
-
-        const onFinish = (values: any) => {
-            console.log('Success:', values);
-          };
-        
-        const onFinishFailed = (errorInfo: any) => {
-          console.log('Failed:', errorInfo);
         };
           
         const columns = [
@@ -167,6 +223,9 @@ class productInfoComponent extends React.Component{
                 title: '类型',
                 dataIndex: 'type',
                 key: 'type',
+                render:(_:any,{type}:any)=>(
+                    <span>{type==0?'纯文字':type==1?'图文':type==2?'图文':type==3?'自定义':type==4?'首页弹窗':'未知'}</span>
+                )
             },
             {
                 title: '广告位置',
@@ -182,6 +241,9 @@ class productInfoComponent extends React.Component{
                 title: '状态',
                 dataIndex: 'status',
                 key: 'status',
+                render: (_:any, record:any)=>(
+                    record.status==0?'使用中':'禁用'
+                )
             },
             {
                 title: '操作',
@@ -189,28 +251,49 @@ class productInfoComponent extends React.Component{
                 key: 'productState',
                 render: (_:any, record:any)=> (
                     <Space size="middle">
-                        <a onClick={this.edit.bind(this,record)}>编辑</a>
+                        <a onClick={this.edit.bind(this,record)}>编辑</a>                        
+                        <Popconfirm title="确定删除本条数据吗？" onConfirm={this.delete.bind(this,record)} okText="是" cancelText="否">
+                            <a>删除</a>
+                        </Popconfirm>
                     </Space>
                 )
             },
         ];
 
         const { formValues, data, pagination, loading, isModalVisible } = this.state; 
-        console.log(formValues)
 
-
-
-        return <div>
-            <div style={{ marginBottom: 16 }}>
-                <Button type="primary" onClick={this.add}  loading={loading}>
-                    <PlusOutlined />
-                    新增
-                </Button>
-                <span style={{ marginLeft: 8 }}>               
-                </span>
-            </div>
+        return <div>            
+            <Card size="small" style={{ width: '100%',marginBottom:16 }}>
+                <Form layout="inline"
+                    name="advanced_search"
+                    className="ant-advanced-search-form"
+                    onFinish={this.search}
+                    >
+                    <Form.Item name="position" label="位置">
+                        <Select showSearch allowClear style={{ width: 200 }}>
+                            <Option value="头部banner">头部banner</Option>
+                        </Select>
+                    </Form.Item>
+                    <Form.Item name="status" label="状态">
+                        <Select showSearch allowClear style={{ width: 200 }}>
+                            <Option value="1">禁用</Option>
+                            <Option value="0">启用</Option>
+                        </Select>
+                    </Form.Item>
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit">搜索</Button>
+                    </Form.Item>
+                    <Form.Item style={{flex:1,textAlign:'right'}}>
+                        <Button type="primary" onClick={this.add}  loading={loading} style={{marginLeft:'3px'}}>
+                            <PlusOutlined />
+                            新增
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </Card>
              
             <Table 
+                size="small"
                 dataSource={data} 
                 columns={columns} 
                 // rowKey="id"
@@ -223,16 +306,42 @@ class productInfoComponent extends React.Component{
             {isModalVisible && <Modal title="新增" visible={isModalVisible} onOk={this.handleOk} onCancel={this.handleCancel}>
                 <Form
                     {...layout}
-                    ref={this.formRef} 
+                    ref={this.formRef}  
                     name="control-ref"
                     initialValues={formValues}
                     onFinish={this.save}
-                    onFinishFailed={onFinishFailed}
                     >
+                    <Form.Item
+                        label="广告位置"
+                        name="position"
+                        rules={[{ required: true, message: '请输入广告位置!' }]}
+                    >
+                        <Select showSearch allowClear>
+                            <Option value="头部banner">头部banner</Option>
+                        </Select>
+                    </Form.Item>
                     <Form.Item
                         label="广告名称"
                         name="name"
                         rules={[{ required: true, message: '请输入广告名称!' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        label="图片"
+                        name="content1"
+                        rules={[{ required: true, message: '请上传广告图片!' }]}
+                    >
+                        <Upload name="filename" 
+                        fileList={this.fileList}
+                        action="/v1/upload/file" listType="picture" data={{is_image:1}} onChange={this.upload} onRemove={this.removeUpload}>
+                            <Button icon={<UploadOutlined />}>上传图片</Button>
+                        </Upload>
+                        (宽640px/高260px)
+                    </Form.Item>
+                    <Form.Item
+                        label="链接"
+                        name="content2"
                     >
                         <Input />
                     </Form.Item>
@@ -242,15 +351,9 @@ class productInfoComponent extends React.Component{
                         name="type"
                         rules={[{ required: true, message: '请输入类型!' }]}
                     >
-                        <Input />
-                    </Form.Item>
-
-                    <Form.Item
-                        label="广告位置"
-                        name="position"
-                        rules={[{ required: true, message: '请输入广告位置!' }]}
-                    >
-                        <Input />
+                        <Select showSearch allowClear>
+                            <Option value={1}>图文</Option>
+                        </Select>
                     </Form.Item>
                     <Form.Item
                         label="排序"
@@ -264,13 +367,10 @@ class productInfoComponent extends React.Component{
                         name="status"
                         rules={[{ required: true, message: '请输入状态!' }]}
                     >
-                        <Input />
-                    </Form.Item>
-
-                    <Form.Item {...tailLayout}>
-                        <Button type="primary" htmlType="submit">
-                        保存
-                        </Button>
+                        <Select showSearch allowClear>
+                            <Option value={1}>禁用</Option>
+                            <Option value={0}>启用</Option>
+                        </Select>
                     </Form.Item>
                 </Form>
             </Modal>}

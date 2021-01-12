@@ -13,7 +13,7 @@ const proSettings: DefaultSettings = {
   fixedHeader: false,
   fixSiderbar: true,
   colorWeak: false,
-  title: 'rzderp',
+  title: '哲肌·管理系统',
   pwa: false,
   iconfontUrl: '',
 };

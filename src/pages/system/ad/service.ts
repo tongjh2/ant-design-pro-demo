@@ -7,13 +7,9 @@ export async function adList(params?: TableListParams) {
   });
 }
 
-export async function removeRule(params: { key: number[] }) {
-  return request('/api/rule', {
-    method: 'POST',
-    data: {
-      ...params,
-      method: 'delete',
-    },
+export async function adDelete(id: number) {
+  return request('/v1/ad/delete/'+id, {
+    method: 'DELETE'
   });
 }
 
@@ -27,16 +23,6 @@ export async function addAd(params: ProductInfoItem) {
     requestType: 'form',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-    },
-  });
-}
-
-export async function updateRule(params: TableListParams) {
-  return request('/api/rule', {
-    method: 'POST',
-    data: {
-      ...params,
-      method: 'update',
     },
   });
 }
