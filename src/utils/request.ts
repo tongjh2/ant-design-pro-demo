@@ -62,7 +62,6 @@ const request = extend({
 
 // request拦截器, 改变url 或 options.
 request.interceptors.request.use((url, options) => {
-  console.log(options)
   if(options.method=='post'){
     const headers = {
       'Authorization': Authorization,
@@ -80,7 +79,6 @@ request.interceptors.request.use((url, options) => {
 // 添加拦截器统一处理返回response
 request.interceptors.response.use(async response => {
   const data = await response.clone().json()
-  console.log(data)
   if(data.status !== 0 && data.message){
     // message.error(data.message)
     // return Promise.reject(data)

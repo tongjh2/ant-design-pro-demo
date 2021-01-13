@@ -1,43 +1,32 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { Table, Button, message, Space, Popconfirm, Modal,Form, Input, Select,Card  } from 'antd';
-import React, { useState, useRef, useEffect } from 'react';
-import { useIntl, FormattedMessage } from 'umi';
-import { PageContainer, FooterToolbar } from '@ant-design/pro-layout';
-import type { ProColumns, ActionType } from '@ant-design/pro-table';
-import ProTable from '@ant-design/pro-table';
-import { ModalForm, ProFormText, ProFormTextArea } from '@ant-design/pro-form';
-import type { ProDescriptionsItemProps } from '@ant-design/pro-descriptions';
-import ProDescriptions from '@ant-design/pro-descriptions';
-import type { FormValueType } from './components/UpdateForm';
-import UpdateForm from './components/UpdateForm';
+import React, { useState, useEffect } from 'react';
 import type { ExplainPostItem,ExplainPostPagination,ExplainPostParams } from './data.d';
 import { explainPostList, explainPostUpdateStatus, explainPostAdd, explainPostDelete } from './service';
 
 
+let explainPostItem: ExplainPostItem = {
+	title: '',
+	images: '',
+	author: '',
+	explain_category_id: 0,
+	explain_kind: 0,
+	description: '',
+	content: '',
+}
+
 
 const ExplainPost: React.FC = () => {
-  /**
-   * 新建窗口的弹窗
-   */
-  const [createModalVisible, handleModalVisible] = useState<boolean>(false);
-  /**
-   * 分布更新窗口的弹窗
-   */
-  const [updateModalVisible, handleUpdateModalVisible] = useState<boolean>(false);
 
-  const [showDetail, setShowDetail] = useState<boolean>(false);
+  const [updateModalVisible, handleModalVisible] = useState<boolean>(false);
+
   const [loading, setLoading] = useState<boolean>(false);
 
-  const actionRef = useRef<ActionType>();
-  const [currentRow, setCurrentRow] = useState<ExplainPostItem>();
+  const [currentRow, setCurrentRow] = useState<ExplainPostItem>(explainPostItem);
   const [selectedRowsState, setSelectedRows] = useState<ExplainPostItem[]>([]);
   const [pagination, setPagination] = useState<ExplainPostPagination>();
 
-  /**
-   * 国际化配置
-   */
-	const intl = useIntl();
-	  
+ 	  
 	const [form] = Form.useForm();
 
   	useEffect(()=>{
@@ -82,10 +71,11 @@ const ExplainPost: React.FC = () => {
 	}
 
 	const handleSubmit = async()=>{
+		console.log(currentRow)
 		try {
 			const values = await form.validateFields();
 			console.log('Success:', values);
-			handleUpdateModalVisible(false)
+			handleModalVisible(false)
 			save(values)
 		} catch (errorInfo) {
 			console.log('Failed:', errorInfo);
@@ -93,17 +83,18 @@ const ExplainPost: React.FC = () => {
 	}
 
 	const add = ()=>{
-		handleUpdateModalVisible(true);
-		setCurrentRow({
-			title: '',
-			images: '',
-			author: '',
-			explain_category_id: 0,
-			explain_kind: 0,
-			description: '',
-			content: '',
-		});
+		handleModalVisible(true);
+		// setCurrentRow({
+		// 	title: '',
+		// 	images: '',
+		// 	author: '',
+		// 	explain_category_id: 0,
+		// 	explain_kind: 0,
+		// 	description: '',
+		// 	content: '',
+		// });
 		form.resetFields()
+		
 	}
 
 	const save = async(item:ExplainPostItem)=>{
@@ -180,8 +171,14 @@ const ExplainPost: React.FC = () => {
 			render: (_:any, record:any)=> (
 				<Space size="middle">
 					<a onClick={() => {
-							handleUpdateModalVisible(true);
+							handleModalVisible(true);
 							setCurrentRow(record);
+							// setCurrentRow(prevCurrentRow=>([...prevCurrentRow,...record]));
+							// useEffect(() => {
+							// 	console.log(currentRow,record)
+							// }, [currentRow]);
+
+							console.log(record,currentRow)
 						}}>编辑</a>
 					<Popconfirm title="确定删除本条数据吗？" onConfirm={()=>{del(record)}} okText="是" cancelText="否">
 						<a>删除</a>
@@ -234,7 +231,7 @@ const ExplainPost: React.FC = () => {
 			onChange={handleTableChange} 
 		/> 
 
-		{updateModalVisible && <Modal title="新增" visible={updateModalVisible} onOk={handleSubmit} onCancel={()=>{handleUpdateModalVisible(false)}}>
+		{updateModalVisible && <Modal title="新增" visible={updateModalVisible} destroyOnClose={true} maskClosable={false} onOk={handleSubmit} onCancel={()=>{handleModalVisible(false)}}>
 			<Form
 				form={form}
 				name="control-ref"
