@@ -84,6 +84,7 @@ class productInfoComponent extends React.Component{
     }
 
     public add(){
+        this.fileList = []
         this.setState({
             formValues: {},
             isModalVisible:true
@@ -116,7 +117,7 @@ class productInfoComponent extends React.Component{
 
     save = async(values:any)=>{
       const hide = message.loading('正在提交');
-        console.log(values)
+        console.log(values, this.fileList)
         let form = Object.assign({},values)
         form.id = this.state.formValues.id
         if(this.fileList.length>0){
@@ -128,7 +129,6 @@ class productInfoComponent extends React.Component{
             content2:form.content2,
         }
         form.content = JSON.stringify(content); 
-        console.log(values)
         try {
             const res = await addAd(form)
             if(res.status===0){
@@ -174,36 +174,31 @@ class productInfoComponent extends React.Component{
     }
 
     upload = (e:any)=>{
-        console.log(e)
         if(e.file.status==='done'){
+            let url = e.file.response.data.url
             this.fileList = [{
                 uid: this.fileList.length+1,
                 name: e.file.name,
                 status: 'done',
-                url: e.file.response.data.url
+                url
             }]  
-            let formValues = Object.assign({},this.state.formValues,{content1:e.file.response.data.url})
-            this.setState({formValues,isModalVisible:true},()=>{
-                console.log(formValues.content1)
+            let formValues = Object.assign({},this.state.formValues,{content1:url})
+            this.setState({formValues},()=>{
+                this.formRef.current?.setFieldsValue({content1:url})
             })
-            console.log(this.fileList, formValues)
         }
     }
 
     removeUpload = (e:any) => {
-        console.log(e)
         this.fileList = []
-        let formValues = Object.assign({},this.state.formValues,{content1:''})
-        // this.setState({formValues,isModalVisible:true},()=>{
-        //     console.log(formValues.content1)
-        // })
+        let formValues = Object.assign({},this.state.formValues,{content1:'',content:''})
         this.state.formValues = formValues
-        this.setState(function(prevState,props){
-            return {formValues}
+        this.setState((prevState,props)=>{
+            return formValues
         },()=>{
-            console.log(this.state.formValues)
+            console.log(formValues)
+            this.formRef.current?.setFieldsValue({content1:''})
         })
-        console.log(this.fileList, formValues)
     }
 
     public render() {
@@ -296,7 +291,6 @@ class productInfoComponent extends React.Component{
                 size="small"
                 dataSource={data} 
                 columns={columns} 
-                // rowKey="id"
                 rowKey={record => record.id}
                 loading={loading} 
                 pagination={pagination}

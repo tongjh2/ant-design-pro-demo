@@ -56,12 +56,6 @@
                 component: './TableList',
               },
               {
-                name: 'warehouseInfo.list',
-                icon: 'table',
-                path: '/warehouseInfo/list',
-                component: './warehouseInfo',
-              },
-              {
                 name: 'productInfo.list',
                 icon: 'table',
                 path: '/productInfo/list',
@@ -101,6 +95,12 @@
                     name: 'ad.list',
                     icon: 'smile',
                     component: './system/ad',
+                  },
+                  {
+                    name: 'explain_post.list',
+                    icon: 'table',
+                    path: '/system/explain_post/list',
+                    component: './system/explain_post',
                   },
                 ],
               },

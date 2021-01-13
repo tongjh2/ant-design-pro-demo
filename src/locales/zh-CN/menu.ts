@@ -56,4 +56,5 @@ export default {
   'menu.base': '基础数据',
   'menu.system': '系统设置',
   'menu.system.ad.list': '广告管理',
+  'menu.system.explain_post.list': '讲解管理',
 };
