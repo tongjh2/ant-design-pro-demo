@@ -21,8 +21,8 @@ export default {
     },
   },
   pre: {
-    '/api/': {
-      target: 'your pre url',
+    '/v1/': {
+      target: 'http://mrry.ranyuxinxi.cn',
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },

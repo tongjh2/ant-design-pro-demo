@@ -48,6 +48,8 @@ const errorHandler = (error: { response: Response }): Response => {
 };
 
 let Authorization = localStorage.getItem('Authorization')||''
+// let ServerHost = 'http://mrry.ranyuxinxi.cn'
+let ServerHost = ''
 
 /**
  * 配置request请求时的默认参数
@@ -71,7 +73,7 @@ request.interceptors.request.use((url, options) => {
     options.requestType = "form"
   }
   return {
-    url,
+    url: ServerHost+url,
     options: { ...options, interceptors: true },
   };
 });

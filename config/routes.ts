@@ -71,19 +71,6 @@
              
 
 
-              {
-                path: '/base',
-                name: 'base',
-                icon: 'crown',
-                routes: [
-                  {
-                    path: '/base/comm_data/list',
-                    name: 'comm_data.list',
-                    icon: 'smile',
-                    component: './base/comm_data',
-                  },
-                ],
-              },
 
               {
                 path: '/system',
@@ -101,6 +88,29 @@
                     icon: 'table',
                     path: '/system/explain_post/list',
                     component: './system/explain_post',
+                  },
+                ],
+              },
+              {
+                path: '/base',
+                name: 'base',
+                icon: 'crown',
+                routes: [
+                  {
+                    path: '/base/comm_data/list/1112',
+                    name: 'comm_data.list.1112',
+                    icon: 'smile',
+                    component: './base/comm_data',
+                  },{
+                    path: '/base/comm_data/list/1114',
+                    name: 'comm_data.list.1114',
+                    icon: 'smile',
+                    component: './base/comm_data',
+                  },{
+                    path: '/base/comm_data/list/1116',
+                    name: 'comm_data.list.1116',
+                    icon: 'smile',
+                    component: './base/comm_data',
                   },
                 ],
               },

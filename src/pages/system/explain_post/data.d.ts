@@ -6,6 +6,7 @@ export type ExplainPostTypes = {
   explain_category_id: number|string;
   explain_kind: number|string;
   description: string;
+  status:number;
   content: string;
 };
 

@@ -1,5 +1,5 @@
 import { PlusOutlined, UploadOutlined, InboxOutlined } from '@ant-design/icons';
-import { Button, message, Form, Input, Select, Table, Modal,Space,Popconfirm,Card,Row, Col,Upload   } from 'antd';
+import { Button, message, Form, Input, Select, Table, Modal,Space,Popconfirm,Card,Row, Col,Upload, Breadcrumb    } from 'antd';
 import React from 'react';
 import type { AdItem } from './data.d';
 import { commDataList, addAd, adDelete } from './service';
@@ -23,6 +23,7 @@ class productInfoComponent extends React.Component{
         params:{
             position:'',
             status:'',
+            sign: '1112',
             pageNo:1,
             pageSize:10,
         },
@@ -38,6 +39,81 @@ class productInfoComponent extends React.Component{
 
     formRef  = React.createRef<FormInstance>()    
     fileList:any[] = []
+    columnsAll:any[] = [
+        {
+            title: '名称',
+            dataIndex: 'name',
+            key: 'name',
+        },
+        {
+            title: '来源分类',
+            dataIndex: 'content1',
+            key: 'content1', 
+            sign:1112
+        },
+        {
+            title: '类型',
+            dataIndex: 'content2',
+            key: 'content2',
+            sign: 1112,
+            render:(_:any,{content2}:any)=>{
+                let text = ''                                       
+                try {
+                    let sourceType = JSON.parse(content2||'{}')
+                    let arr = [];
+                    if(sourceType.TuanGou==1)arr.push('团购');
+                    if(sourceType.LaoDaiXin==1)arr.push('老带新');
+                    if(sourceType.JingJia==1)arr.push('竞价');
+                    if(sourceType.YuFu==1)arr.push('预付');
+                    text = arr.join(',')
+                } catch (error) {
+                    console.log(content2)
+                    console.log(error)
+                } 
+                return (text)
+            }
+        },
+        { title: '联系人', dataIndex: 'content1', key: 'content1', sign:1116 },
+        { title: '联系电话', dataIndex: 'content2', key: 'content2', sign:1116 },
+        { title: '注册单位', dataIndex: 'content3', key: 'content3', sign:1116 },
+        {
+            title: '拼音码',
+            dataIndex: 'pym',
+            key: 'pym',
+        },
+        {
+            title: '五笔码',
+            dataIndex: 'wbm',
+            key: 'wbm',
+        },
+        {
+            title: '排序',
+            dataIndex: 'sort',
+            key: 'sort',
+        },
+        {
+            title: '状态',
+            dataIndex: 'status',
+            key: 'status',
+            render: (_:any, record:any)=>(
+                record.status==0?'正常':'禁用'
+            )
+        },
+        {
+            title: '操作',
+            dataIndex: 'productState',
+            key: 'productState',
+            render: (_:any, record:any)=> (
+                <Space size="middle">
+                    <a onClick={this.edit.bind(this,record)}>编辑</a>                        
+                    <Popconfirm title="确定删除本条数据吗？" onConfirm={this.delete.bind(this,record)} okText="是" cancelText="否">
+                        <a>删除</a>
+                    </Popconfirm>
+                </Space>
+            )
+        },
+    ]
+    columns:any[] = []
 
     constructor(props:any) {
         super(props);
@@ -45,10 +121,17 @@ class productInfoComponent extends React.Component{
         this.edit = this.edit.bind(this);
         this.handleOk = this.handleOk.bind(this);
         this.handleCancel = this.handleCancel.bind(this);
+        let sign = (props.route.name.replace('comm_data.list.',''))
+        let params = Object.assign({},this.state.params,{sign})
+        this.state.params = params
+        this.columns = this.columnsAll.filter((v:any)=>{
+            return !v.sign || v.sign==sign
+        })
+        
     }
 
     public componentDidMount() {
-        this.getAdList()
+        this.getList()
     }
 
     handleTableChange = (pagination:any, filters:any, sorter:any) => {
@@ -59,19 +142,19 @@ class productInfoComponent extends React.Component{
           ...filters,
         });
         this.state.params.pageNo = pagination.current        
-        this.getAdList()
+        this.getList()
       };
 
     search = (values:any)=>{
         this.state.params = Object.assign(this.state.params,values)
         this.state.params.pageNo = 1
-        this.getAdList()
+        this.getList()
     }
 
-    private async getAdList(){
+    private async getList(){
         this.setState({ loading: true });
         const { params } = this.state;
-        let res = await adList(params)
+        let res = await commDataList(params)
         this.setState({
             loading: false,
             data: res.data.data||[],
@@ -134,7 +217,7 @@ class productInfoComponent extends React.Component{
             if(res.status===0){
                 this.setState({isModalVisible:false})
                 message.success('保存成功')
-                this.getAdList()
+                this.getList()
             }else{
                 message.error(res.message)
             }
@@ -162,7 +245,7 @@ class productInfoComponent extends React.Component{
         try { 
             await adDelete(item.id||0);
             message.success('操作成功')
-            this.getAdList()
+            this.getList()
         } catch (errorInfo) {
             console.log('Failed:', errorInfo);
             message.warn('操作失败')
@@ -208,24 +291,47 @@ class productInfoComponent extends React.Component{
             wrapperCol: { span: 20 },
         };
           
-        const columns = [
+        const columns2 = [
             {
-                title: '广告名称',
+                title: '名称',
                 dataIndex: 'name',
                 key: 'name',
             },
             {
-                title: '类型',
-                dataIndex: 'type',
-                key: 'type',
-                render:(_:any,{type}:any)=>(
-                    <span>{type==0?'纯文字':type==1?'图文':type==2?'图文':type==3?'自定义':type==4?'首页弹窗':'未知'}</span>
-                )
+                title: '来源分类',
+                dataIndex: 'content1',
+                key: 'content1'
             },
             {
-                title: '广告位置',
-                dataIndex: 'position',
-                key: 'position',
+                title: '类型',
+                dataIndex: 'content2',
+                key: 'content2',
+                render:(_:any,{content2}:any)=>{
+                    let text = ''                                       
+                    try {
+                        let sourceType = JSON.parse(content2||'{}')
+                        let arr = [];
+                        if(sourceType.TuanGou==1)arr.push('团购');
+                        if(sourceType.LaoDaiXin==1)arr.push('老带新');
+                        if(sourceType.JingJia==1)arr.push('竞价');
+                        if(sourceType.YuFu==1)arr.push('预付');
+                        text = arr.join(',')
+                    } catch (error) {
+                        console.log(content2)
+                        console.log(error)
+                    } 
+                    return (text)
+                }
+            },
+            {
+                title: '拼音码',
+                dataIndex: 'pym',
+                key: 'pym',
+            },
+            {
+                title: '五笔码',
+                dataIndex: 'wbm',
+                key: 'wbm',
             },
             {
                 title: '排序',
@@ -237,7 +343,7 @@ class productInfoComponent extends React.Component{
                 dataIndex: 'status',
                 key: 'status',
                 render: (_:any, record:any)=>(
-                    record.status==0?'使用中':'禁用'
+                    record.status==0?'正常':'禁用'
                 )
             },
             {
@@ -257,8 +363,16 @@ class productInfoComponent extends React.Component{
 
         const { formValues, data, pagination, loading, isModalVisible } = this.state; 
 
-        return <div>            
+        return <div>
+            
             <Card size="small" style={{ width: '100%',marginBottom:16 }}>
+                <div style={{paddingBottom:"15px"}}>
+                    <Breadcrumb>
+                        <Breadcrumb.Item>首页</Breadcrumb.Item>
+                        <Breadcrumb.Item><a href="">基础数据</a></Breadcrumb.Item>
+                        <Breadcrumb.Item>信息来源</Breadcrumb.Item>
+                    </Breadcrumb>
+                </div>
                 <Form layout="inline"
                     name="advanced_search"
                     className="ant-advanced-search-form"
@@ -290,7 +404,7 @@ class productInfoComponent extends React.Component{
             <Table 
                 size="small"
                 dataSource={data} 
-                columns={columns} 
+                columns={this.columns} 
                 rowKey={record => record.id}
                 loading={loading} 
                 pagination={pagination}

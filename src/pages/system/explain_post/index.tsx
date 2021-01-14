@@ -1,5 +1,5 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { Table, Button, message, Space, Popconfirm, Modal,Form, Input, Select,Card  } from 'antd';
+import { Table, Button, message, Space, Popconfirm, Modal,Form, Input, Select,Card,Upload  } from 'antd';
 import React, { useState, useEffect } from 'react';
 import type { ExplainPostTypes,ExplainPostPagination,ExplainPostParamsTypes } from './data.d';
 import { explainPostForm,explainPostParams,explainPostList, explainPostUpdateStatus, explainPostAdd, explainPostDelete } from './service';
@@ -19,10 +19,32 @@ const ExplainPost: React.FC = () => {
   const [currentRow, setCurrentRow] = useState<ExplainPostTypes>(cloneDeep(explainPostForm));
   const [explainCategoryList, setExplainCategoryList] = useState<ExplainPostTypes[]>([]);
   const [selectedRowsState, setSelectedRows] = useState<ExplainPostTypes[]>([]);
+  const [fileList, setFileList] = useState<any[]>([]);
   const [pagination, setPagination] = useState<ExplainPostPagination>();
 
- 	  
+
+  const [previewVisible, setPreviewVisible] = useState<boolean>(false);
+  const [previewImage, setPreviewImage] = useState<string>('');
+   	  
 	const [form] = Form.useForm();
+
+	const uploadChange = (e:any)=>{
+		if(e.file.status==='done'){
+            let url = e.file.response.data.url
+            let fileList = [{
+                uid: 1,
+                name: e.file.name,
+                status: 'done',
+                url
+			}]  
+			setFileList(fileList)
+			form.setFieldsValue({content1:url})
+        }else if(e.file.status==='removed'){
+			setFileList([])
+			form.setFieldsValue({content1:''})
+		}
+	}
+
 
   	useEffect(()=>{
 		console.log("第一次渲染");
@@ -52,7 +74,6 @@ const ExplainPost: React.FC = () => {
         getList()
       }
 
-
 	const getList = async()=>{
 		setLoading(true)
 		let res = await explainPostList(params)
@@ -66,10 +87,8 @@ const ExplainPost: React.FC = () => {
 	}
 
 	const handleSubmit = async()=>{
-		console.log(currentRow)
 		try {
 			const values = await form.validateFields();
-			console.log('Success:', values);
 			handleModalVisible(false)
 			save(values)
 		} catch (errorInfo) {
@@ -81,15 +100,17 @@ const ExplainPost: React.FC = () => {
 		let item = cloneDeep(explainPostForm)
 		form.setFieldsValue(item);
 		setCurrentRow(item);
+		setFileList([])
 		// form.resetFields()		
 		handleModalVisible(true);
 	}
 
 	const save = async(item:ExplainPostTypes)=>{
-		console.log(item)
 		const hide = message.loading('正在提交');
 		try {
 			item.id = currentRow?.id
+			let [file] = fileList
+			item.images = file?file.url:''
 			const res = await explainPostAdd(item);
 			if(res.status!==0)throw new Error(res.message)
 			hide();
@@ -102,7 +123,6 @@ const ExplainPost: React.FC = () => {
 	}
 
 	const del = async(item:ExplainPostTypes)=>{
-		console.log(item)
 		try {
 			const res = await explainPostDelete(item.id||0);
 			if(res.status!==0)throw new Error(res.message)
@@ -110,6 +130,17 @@ const ExplainPost: React.FC = () => {
 			getList()
 		} catch (error) {
 			message.error('操作失败请重试！'+error.message);
+		}
+	}
+
+	const updateStatus = async(item:ExplainPostTypes)=>{
+		console.log(item)
+		try {
+			await explainPostUpdateStatus(item.id||0, item.status===0?1:0)
+			getList()
+			message.success('操作成功')
+		} catch (error) {
+			message.error('操作失败：'+error.message)
 		}
 	}
 
@@ -161,11 +192,22 @@ const ExplainPost: React.FC = () => {
 							setCurrentRow(record);
 							handleModalVisible(true);
 							form.setFieldsValue(record);
-
-							console.log(record,currentRow)
+							let fileList:any[] = []
+							if(record.images){
+								fileList = [{
+									uid: 1,
+									name: 'name',
+									status: 'done',
+									url: record.images
+								}]
+							}
+							setFileList(fileList)
 						}}>编辑</a>
-					<Popconfirm title="确定删除本条数据吗？" onConfirm={()=>{del(record)}} okText="是" cancelText="否">
-						<a>删除</a>
+						<Popconfirm title="确定删除本条数据吗？" onConfirm={()=>{del(record)}} okText="是" cancelText="否">
+							<a>删除</a>
+						</Popconfirm>
+					<Popconfirm title="确定禁用本条数据吗？" onConfirm={()=>{updateStatus(record)}} okText="是" cancelText="否">
+						<a>{record.status===0?'禁用':'启用'}</a>
 					</Popconfirm>
 				</Space>
 			)
@@ -178,13 +220,27 @@ const ExplainPost: React.FC = () => {
 			<Form layout="inline"
 				name="advanced_search"
 				className="ant-advanced-search-form"
-				onFinish={()=>{
-
+				onFinish={(values)=>{
+					console.log(values)
+					params = Object.assign({},params,values,{page:1})
+					console.log(params)
+					getList()
 				}}
 				>
-				<Form.Item name="position" label="位置">
+				<Form.Item name="q" label="标题">
+					<Input allowClear />
+				</Form.Item>
+				<Form.Item name="explain_category_id" label="讲解分类">
 					<Select showSearch allowClear style={{ width: 200 }}>
-						<Option value="头部banner">头部banner</Option>
+						{explainCategoryList}
+					</Select>
+				</Form.Item>
+				<Form.Item name="explain_kind" label="讲解种类">
+					<Select showSearch allowClear style={{ width: 200 }}>
+						<Option value={1}>病理</Option>
+						<Option value={2}>病因/病程</Option>
+						<Option value={3}>优势</Option>
+						<Option value={4}>案例</Option>
 					</Select>
 				</Form.Item>
 				<Form.Item name="status" label="状态">
@@ -235,7 +291,34 @@ const ExplainPost: React.FC = () => {
 					label="题图"
 					name="images"
 				>
-					<Input />
+					<Upload
+					name="filename" 
+					action="/v1/upload/file"
+					listType="picture-card"
+					data={{is_image:1}}
+					fileList={fileList}
+					onPreview={(e:any)=>{
+						setPreviewVisible(true)
+						setPreviewImage(e.url)
+					}}
+					onChange={uploadChange}
+					>
+					<div>
+						<PlusOutlined />
+						<div style={{ marginTop: 8 }}>上传</div>
+					</div>
+					</Upload>
+					<Modal
+					visible={previewVisible}
+					title="图片查看"
+					width="800px"
+					footer={null}
+					onCancel={()=>{
+						setPreviewVisible(false)
+					}}
+					>
+					<img alt="example" style={{ width: '100%' }} src={previewImage} />
+					</Modal>
 				</Form.Item>
 				<Form.Item
 					label="作者"

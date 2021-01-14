@@ -58,5 +58,7 @@ export default {
   'menu.system.ad.list': '广告管理',
   'menu.system.explain_post.list': '讲解管理',
 
-  'menu.base.comm_data.list': '基础数据',
+  'menu.base.comm_data.list.1112': '信息来源',
+  'menu.base.comm_data.list.1114': '地域来源',
+  'menu.base.comm_data.list.1116': '门店主体',
 };

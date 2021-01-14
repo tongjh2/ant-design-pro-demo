@@ -59,11 +59,16 @@ export async function explainPostList(params: ExplainPostParamsTypes) {
 }
 
 
-export async function explainPostUpdateStatus(params: ExplainPostParams) {
+export async function explainPostUpdateStatus(id:number,status:number) {
   return request('/v1/explain_post/update_status', {
     method: 'PUT',
     data: {
-      ...params
+      id,
+      status
+    },
+    requestType: 'form',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
   });
 }

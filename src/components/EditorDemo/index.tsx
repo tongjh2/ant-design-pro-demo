@@ -2,7 +2,6 @@ import React from 'react'
 import BraftEditor from 'braft-editor'
 import 'braft-editor/dist/index.css'
 import { message  } from 'antd';
-import { reject } from 'lodash';
 
 export default class EditorDemo extends React.Component {
     state = {
@@ -10,7 +9,7 @@ export default class EditorDemo extends React.Component {
         editorState: BraftEditor.createEditorState(null)
     }
  
-    async componentDidMount() {
+    async componentDidMount() { 
         var _self = this
         this.setState({
             editorState: BraftEditor.createEditorState(this.props.val)
