@@ -77,10 +77,10 @@
                 icon: 'crown',
                 routes: [
                   {
-                    path: '/base/invoiceClause/list',
-                    name: 'invoiceClause.list',
+                    path: '/base/comm_data/list',
+                    name: 'comm_data.list',
                     icon: 'smile',
-                    component: './base/invoiceClause',
+                    component: './base/comm_data',
                   },
                 ],
               },

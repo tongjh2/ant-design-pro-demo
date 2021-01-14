@@ -1,29 +1,24 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { Table, Button, message, Space, Popconfirm, Modal,Form, Input, Select,Card  } from 'antd';
 import React, { useState, useEffect } from 'react';
-import type { ExplainPostItem,ExplainPostPagination,ExplainPostParams } from './data.d';
-import { explainPostList, explainPostUpdateStatus, explainPostAdd, explainPostDelete } from './service';
-
-
-let explainPostItem: ExplainPostItem = {
-	title: '',
-	images: '',
-	author: '',
-	explain_category_id: 0,
-	explain_kind: 0,
-	description: '',
-	content: '',
-}
+import type { ExplainPostTypes,ExplainPostPagination,ExplainPostParamsTypes } from './data.d';
+import { explainPostForm,explainPostParams,explainPostList, explainPostUpdateStatus, explainPostAdd, explainPostDelete } from './service';
+import { commDataList } from '../../base/comm_data/service';
+import { CommDataParams } from '../../base/comm_data/data.d';
+import { cloneDeep } from "lodash";
+const { Option } = Select;
+import EditorDemo from '@/components/EditorDemo'
 
 
 const ExplainPost: React.FC = () => {
 
-  const [updateModalVisible, handleModalVisible] = useState<boolean>(false);
+  const [modalVisible, handleModalVisible] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [currentRow, setCurrentRow] = useState<ExplainPostItem>(explainPostItem);
-  const [selectedRowsState, setSelectedRows] = useState<ExplainPostItem[]>([]);
+  const [currentRow, setCurrentRow] = useState<ExplainPostTypes>(cloneDeep(explainPostForm));
+  const [explainCategoryList, setExplainCategoryList] = useState<ExplainPostTypes[]>([]);
+  const [selectedRowsState, setSelectedRows] = useState<ExplainPostTypes[]>([]);
   const [pagination, setPagination] = useState<ExplainPostPagination>();
 
  	  
@@ -32,18 +27,18 @@ const ExplainPost: React.FC = () => {
   	useEffect(()=>{
 		console.log("第一次渲染");
 		getList() 
+		getExplainCategory()
 	},[])
 
-	let params:ExplainPostParams = {
-		q:'',//标题
-		explain_category_id:'', //讲解分类id
-		explain_kind:'', //讲解种类 1 病理 2病因/病程 3 优势 4 案例
-		explain_category_name:'',
-		explain_kind_name:'',
-		status:'',      //状态
-		page:1,
-		page_size:10,
+	const getExplainCategory = async() => {
+		const res = await commDataList({page:1,page_size:100,sign:1223} as CommDataParams);
+		let list = (res.data.data||[]).map((v:any)=>{
+			return <Option key={v.id} value={v.id}>{v.name}</Option>
+		})
+		setExplainCategoryList(list)
 	}
+
+	let params:ExplainPostParamsTypes = cloneDeep(explainPostParams)
 
 	const handleTableChange = (pagination:any, filters:any, sorter:any) => {
         console.log({
@@ -83,21 +78,14 @@ const ExplainPost: React.FC = () => {
 	}
 
 	const add = ()=>{
+		let item = cloneDeep(explainPostForm)
+		form.setFieldsValue(item);
+		setCurrentRow(item);
+		// form.resetFields()		
 		handleModalVisible(true);
-		// setCurrentRow({
-		// 	title: '',
-		// 	images: '',
-		// 	author: '',
-		// 	explain_category_id: 0,
-		// 	explain_kind: 0,
-		// 	description: '',
-		// 	content: '',
-		// });
-		form.resetFields()
-		
 	}
 
-	const save = async(item:ExplainPostItem)=>{
+	const save = async(item:ExplainPostTypes)=>{
 		console.log(item)
 		const hide = message.loading('正在提交');
 		try {
@@ -113,7 +101,7 @@ const ExplainPost: React.FC = () => {
 		}
 	}
 
-	const del = async(item:ExplainPostItem)=>{
+	const del = async(item:ExplainPostTypes)=>{
 		console.log(item)
 		try {
 			const res = await explainPostDelete(item.id||0);
@@ -124,7 +112,6 @@ const ExplainPost: React.FC = () => {
 			message.error('操作失败请重试！'+error.message);
 		}
 	}
-
 
 	const columns = [
 		{
@@ -171,12 +158,9 @@ const ExplainPost: React.FC = () => {
 			render: (_:any, record:any)=> (
 				<Space size="middle">
 					<a onClick={() => {
-							handleModalVisible(true);
 							setCurrentRow(record);
-							// setCurrentRow(prevCurrentRow=>([...prevCurrentRow,...record]));
-							// useEffect(() => {
-							// 	console.log(currentRow,record)
-							// }, [currentRow]);
+							handleModalVisible(true);
+							form.setFieldsValue(record);
 
 							console.log(record,currentRow)
 						}}>编辑</a>
@@ -231,7 +215,7 @@ const ExplainPost: React.FC = () => {
 			onChange={handleTableChange} 
 		/> 
 
-		{updateModalVisible && <Modal title="新增" visible={updateModalVisible} destroyOnClose={true} maskClosable={false} onOk={handleSubmit} onCancel={()=>{handleModalVisible(false)}}>
+		{modalVisible && <Modal title="新增" visible={modalVisible} destroyOnClose={true} maskClosable={false} onOk={handleSubmit} onCancel={()=>{handleModalVisible(false)}} width="1000px">
 			<Form
 				form={form}
 				name="control-ref"
@@ -265,7 +249,7 @@ const ExplainPost: React.FC = () => {
 					rules={[{ required: true, message: '请输入分类!' }]}
 				>
 					<Select showSearch allowClear>
-						<Option value="头部banner">头部banner</Option>
+						{explainCategoryList}
 					</Select>
 				</Form.Item>
 
@@ -293,7 +277,7 @@ const ExplainPost: React.FC = () => {
 					name="content"
 					rules={[{ required: true, message: '请输入内容!' }]}
 				>
-					<Input.TextArea />
+					<EditorDemo val={currentRow.content} />
 				</Form.Item>
 			</Form>
 		</Modal>}

@@ -1,10 +1,10 @@
-export type ProductInfoItem = {
-  id?: Number;
-  productCode: string;
-  productName: string;
-  productKind: string;
-  sortVal: string;
-  remarks: string;
+export type AdItem = {
+  id?: number;
+  name: string;
+  type: number;
+  position: string;
+  sort: number;
+  status: number;
 };
 
 export type TableListPagination = {
@@ -18,7 +18,7 @@ export type TableListData = {
   pagination: Partial<TableListPagination>;
 };
 
-export type TableListParams = {
+export type CommDataParams = {
   status?: string;
   name?: string;
   desc?: string;

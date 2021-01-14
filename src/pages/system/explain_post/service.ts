@@ -1,7 +1,29 @@
 import request from '@/utils/request';
-import type { ExplainPostParams, ExplainPostItem } from './data.d';
+import type { ExplainPostTypes,ExplainPostParamsTypes } from './data.d';
 
-export async function explainPostAdd(params: ExplainPostItem) {
+
+export const explainPostForm:ExplainPostTypes = {
+  title: '',
+	images: '',
+	author: '',
+	explain_category_id: '',
+	explain_kind: '',
+	description: '',
+	content: '',
+}
+
+export const explainPostParams:ExplainPostParamsTypes = {
+  q:'',//标题
+  explain_category_id:'', //讲解分类id
+  explain_kind:'', //讲解种类 1 病理 2病因/病程 3 优势 4 案例
+  explain_category_name:'',
+  explain_kind_name:'',
+  status:'',      //状态
+  page:1,
+  page_size:10,
+}
+
+export async function explainPostAdd(params: ExplainPostTypes) {
   return request('/v1/explain_post/add', {
     method: 'POST',
     data: {
@@ -30,7 +52,7 @@ export async function explainPostItem(id: number) {
   });
 }
 
-export async function explainPostList(params: ExplainPostParams) {
+export async function explainPostList(params: ExplainPostParamsTypes) {
   return request('/v1/explain_post/list', {
     params,
   });

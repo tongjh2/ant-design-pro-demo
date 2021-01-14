@@ -1,10 +1,10 @@
-export type ExplainPostItem = {
+export type ExplainPostTypes = {
   id?: number;
   title: string;
   images: string;
   author: string;
-  explain_category_id: number;
-  explain_kind: number;
+  explain_category_id: number|string;
+  explain_kind: number|string;
   description: string;
   content: string;
 };
@@ -16,11 +16,11 @@ export type ExplainPostPagination = {
 };
 
 export type ExplainPostData = {
-  list: ExplainPostItem[];
+  list: ExplainPostTypes[];
   pagination: Partial<ExplainPostPagination>;
 };
 
-export type ExplainPostParams = {
+export type ExplainPostParamsTypes = {
   q?:string;
   explain_category_id?:number|string;
   explain_kind?:string;
