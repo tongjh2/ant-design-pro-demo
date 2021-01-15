@@ -246,7 +246,7 @@ class productInfoComponent extends React.Component{
                 key: 'productState',
                 render: (_:any, record:any)=> (
                     <Space size="middle">
-                        <a onClick={this.edit.bind(this,record)}>编辑</a>                        
+                        <a onClick={this.edit.bind(this,record)}>编辑</a>
                         <Popconfirm title="确定删除本条数据吗？" onConfirm={this.delete.bind(this,record)} okText="是" cancelText="否">
                             <a>删除</a>
                         </Popconfirm>

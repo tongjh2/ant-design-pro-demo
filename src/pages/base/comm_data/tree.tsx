@@ -1,12 +1,24 @@
-import { PlusOutlined, UploadOutlined, InboxOutlined } from '@ant-design/icons';
-import { Button, message, Form, Input, Select, Table, Modal,Space,Popconfirm,Card,Row, Col,Upload, Breadcrumb    } from 'antd';
+import { PlusOutlined, UploadOutlined, DownOutlined, InboxOutlined } from '@ant-design/icons';
+import { Button, message, Form, Input, Select, Table, Modal,Space,Popconfirm,Card,Row, Col,Upload, Breadcrumb,Tree     } from 'antd';
 import React from 'react';
 import type { CommDataItem } from './data.d';
-import { commDataList, commDatadAdd, commDataDelete } from './service';
+import { commDataForm, commDataList, commDatadAdd, commDataDelete } from './service';
 import { FormInstance } from 'antd/lib/form';
+import { cloneDeep } from 'lodash';
 const { Option } = Select;
 
-class productInfoComponent extends React.Component{
+let commDataForm2:CommDataItem = {
+    sign: '',
+    pid: 0,
+    name: '',
+    sort: 0,
+    status: 0,
+    content1: '',
+    content2: '',
+    content3: '',
+  }
+
+class commDataTreeComponent extends React.Component{
 
     state = {
         formValues:{
@@ -34,7 +46,8 @@ class productInfoComponent extends React.Component{
             pageSize: 10,
         },
         loading: false,
-        isModalVisible: false
+        isModalVisible: false,
+        treeData: []
     };
 
     formRef  = React.createRef<FormInstance>()    
@@ -118,7 +131,6 @@ class productInfoComponent extends React.Component{
     constructor(props:any) {
         super(props);
         this.add = this.add.bind(this);
-        this.edit = this.edit.bind(this);
         this.handleOk = this.handleOk.bind(this);
         this.handleCancel = this.handleCancel.bind(this);
         let sign = (props.route.name.replace('comm_data.list.',''))
@@ -155,6 +167,7 @@ class productInfoComponent extends React.Component{
         this.setState({ loading: true });
         const { params } = this.state;
         let res = await commDataList(params)
+        this.treeData = this.formatTree((res.data.data||[]), 0)
         this.setState({
             loading: false,
             data: res.data.data||[],
@@ -162,38 +175,68 @@ class productInfoComponent extends React.Component{
                 total: res.data.pagenation.total,
                 current: res.data.pagenation.page,
                 pageSize: res.data.pagenation.page_size
+            },
+            treeData:this.treeData
+        })
+    }
+
+    public formatTree(data:any[],pid:number){
+        let arr:any[] = []
+        data.forEach((v:any)=>{
+            if(v.pid===pid){
+                v.key = v.id
+                v.title = (
+                    <div>{v.name} 
+                        <Button onClick={this.edit.bind(this,v)} size="small" type="link">编辑</Button>
+                        <Button onClick={this.addChildren.bind(this,v)} size="small" type="link">新增子集</Button>
+                    </div>
+                )
+
+                v.children = this.formatTree(data,v.id)
+                arr.push(v)
             }
         })
+        return arr
     }
 
     public add(){
-        this.fileList = []
+        let formValues = cloneDeep(commDataForm)
+        formValues.pid = 0
+        formValues.sign = this.state.params.sign
         this.setState({
-            formValues: {},
+            formValues,
             isModalVisible:true
         })
-
-        // this.formRef.current.resetFields();
     }
 
-    public edit(item:any){
+    
+    public addChildren(item: CommDataItem){
         console.log(item)
-        let content = JSON.parse(item.content||'[]')
-        item.content1 = content.content1;
-        item.content2 = content.content2;
+        let formValues = cloneDeep(commDataForm)
+        formValues.pid = item.id||0
+        formValues.sign = item.sign
+        this.setState({
+            formValues,
+            isModalVisible:true
+        })
+    }
 
-        this.fileList = []
-        if(item.content1){
-            this.fileList = [{
-                uid: this.fileList.length+1,
-                name: "banner",
-                status: 'done',
-                url: item.content1
-            }]
-        }
+    public edit(item: CommDataItem){
+        console.log(item)
+        let formValues = Object.assign({}, item)
+
+        // this.fileList = []
+        // if(item.content1){
+        //     this.fileList = [{
+        //         uid: this.fileList.length+1,
+        //         name: "banner",
+        //         status: 'done',
+        //         url: item.content1
+        //     }]
+        // }
 
         this.setState({
-            formValues: Object.assign({}, item),
+            formValues,
             isModalVisible:true
         })
     }
@@ -201,19 +244,19 @@ class productInfoComponent extends React.Component{
     save = async(values:any)=>{
       const hide = message.loading('正在提交');
         console.log(values, this.fileList)
-        let form = Object.assign({},values)
-        form.id = this.state.formValues.id
-        if(this.fileList.length>0){
-            let [img] = this.fileList
-            form.content1 = img.url
-        }
-        let content = {
-            content1:form.content1,
-            content2:form.content2,
-        }
-        form.content = JSON.stringify(content); 
+        let form = Object.assign({}, this.state.formValues, values)
+
+        // if(this.fileList.length>0){
+        //     let [img] = this.fileList
+        //     form.content1 = img.url
+        // }
+        // let content = {
+        //     content1:form.content1,
+        //     content2:form.content2,
+        // }
+        // form.content = JSON.stringify(content); 
         try {
-            const res = await addAd(form)
+            const res = await commDatadAdd(form)
             if(res.status===0){
                 this.setState({isModalVisible:false})
                 message.success('保存成功')
@@ -241,9 +284,9 @@ class productInfoComponent extends React.Component{
         }
     }
 
-    delete = async(item:AdItem)=>{
+    delete = async(item:CommDataItem)=>{
         try { 
-            await adDelete(item.id||0);
+            await commDataDelete(item.id||0);
             message.success('操作成功')
             this.getList()
         } catch (errorInfo) {
@@ -284,6 +327,12 @@ class productInfoComponent extends React.Component{
         })
     }
 
+    onSelect = ()=>{
+
+    }
+
+    treeData:any[] = []
+
     public render() {
 
         const layout = {
@@ -291,77 +340,9 @@ class productInfoComponent extends React.Component{
             wrapperCol: { span: 20 },
         };
           
-        const columns2 = [
-            {
-                title: '名称',
-                dataIndex: 'name',
-                key: 'name',
-            },
-            {
-                title: '来源分类',
-                dataIndex: 'content1',
-                key: 'content1'
-            },
-            {
-                title: '类型',
-                dataIndex: 'content2',
-                key: 'content2',
-                render:(_:any,{content2}:any)=>{
-                    let text = ''                                       
-                    try {
-                        let sourceType = JSON.parse(content2||'{}')
-                        let arr = [];
-                        if(sourceType.TuanGou==1)arr.push('团购');
-                        if(sourceType.LaoDaiXin==1)arr.push('老带新');
-                        if(sourceType.JingJia==1)arr.push('竞价');
-                        if(sourceType.YuFu==1)arr.push('预付');
-                        text = arr.join(',')
-                    } catch (error) {
-                        console.log(content2)
-                        console.log(error)
-                    } 
-                    return (text)
-                }
-            },
-            {
-                title: '拼音码',
-                dataIndex: 'pym',
-                key: 'pym',
-            },
-            {
-                title: '五笔码',
-                dataIndex: 'wbm',
-                key: 'wbm',
-            },
-            {
-                title: '排序',
-                dataIndex: 'sort',
-                key: 'sort',
-            },
-            {
-                title: '状态',
-                dataIndex: 'status',
-                key: 'status',
-                render: (_:any, record:any)=>(
-                    record.status==0?'正常':'禁用'
-                )
-            },
-            {
-                title: '操作',
-                dataIndex: 'productState',
-                key: 'productState',
-                render: (_:any, record:any)=> (
-                    <Space size="middle">
-                        <a onClick={this.edit.bind(this,record)}>编辑</a>                        
-                        <Popconfirm title="确定删除本条数据吗？" onConfirm={this.delete.bind(this,record)} okText="是" cancelText="否">
-                            <a>删除</a>
-                        </Popconfirm>
-                    </Space>
-                )
-            },
-        ];
+       
 
-        const { formValues, data, pagination, loading, isModalVisible } = this.state; 
+        const { formValues, data, pagination, loading, isModalVisible,treeData } = this.state; 
 
         return <div>
             
@@ -400,8 +381,19 @@ class productInfoComponent extends React.Component{
                     </Form.Item>
                 </Form>
             </Card>
+
+            <div style={{padding:'15px',background:'#fff'}}>
+                <Tree
+                showLine
+                autoExpandParent
+                selectable={false}
+                switcherIcon={<DownOutlined />}
+                onSelect={this.onSelect}
+                treeData={treeData}
+                />
+            </div>
              
-            <Table 
+            {/* <Table 
                 size="small"
                 dataSource={data} 
                 columns={this.columns} 
@@ -409,9 +401,9 @@ class productInfoComponent extends React.Component{
                 loading={loading} 
                 pagination={pagination}
                 onChange={this.handleTableChange}
-            />
+            /> */}
 
-            {isModalVisible && <Modal title="新增" visible={isModalVisible} onOk={this.handleOk} onCancel={this.handleCancel}>
+            {isModalVisible && <Modal title="编辑" visible={isModalVisible} onOk={this.handleOk} onCancel={this.handleCancel}>
                 <Form
                     {...layout}
                     ref={this.formRef}  
@@ -419,7 +411,7 @@ class productInfoComponent extends React.Component{
                     initialValues={formValues}
                     onFinish={this.save}
                     >
-                    <Form.Item
+                    {/* <Form.Item
                         label="广告位置"
                         name="position"
                         rules={[{ required: true, message: '请输入广告位置!' }]}
@@ -427,15 +419,15 @@ class productInfoComponent extends React.Component{
                         <Select showSearch allowClear>
                             <Option value="头部banner">头部banner</Option>
                         </Select>
-                    </Form.Item>
+                    </Form.Item> */}
                     <Form.Item
-                        label="广告名称"
+                        label="名称"
                         name="name"
-                        rules={[{ required: true, message: '请输入广告名称!' }]}
+                        rules={[{ required: true, message: '请输入名称!' }]}
                     >
                         <Input />
                     </Form.Item>
-                    <Form.Item
+                    {/* <Form.Item
                         label="图片"
                         name="content1"
                         rules={[{ required: true, message: '请上传广告图片!' }]}
@@ -452,9 +444,9 @@ class productInfoComponent extends React.Component{
                         name="content2"
                     >
                         <Input />
-                    </Form.Item>
+                    </Form.Item> */}
 
-                    <Form.Item
+                    {/* <Form.Item
                         label="类型"
                         name="type"
                         rules={[{ required: true, message: '请输入类型!' }]}
@@ -469,8 +461,8 @@ class productInfoComponent extends React.Component{
                         rules={[{ required: true, message: '请输入排序!' }]}
                     >
                         <Input />
-                    </Form.Item>
-                    <Form.Item
+                    </Form.Item> */}
+                    {/* <Form.Item
                         label="状态"
                         name="status"
                         rules={[{ required: true, message: '请输入状态!' }]}
@@ -479,7 +471,7 @@ class productInfoComponent extends React.Component{
                             <Option value={1}>禁用</Option>
                             <Option value={0}>启用</Option>
                         </Select>
-                    </Form.Item>
+                    </Form.Item> */}
                 </Form>
             </Modal>}
         </div>;
@@ -490,4 +482,4 @@ class productInfoComponent extends React.Component{
 }
 
 
-export default productInfoComponent
+export default commDataTreeComponent

@@ -1,5 +1,16 @@
 import request from '@/utils/request';
-import type { CommDataParams, ProductInfoItem } from './data.d';
+import type { CommDataParams, CommDataItem } from './data.d';
+
+export let commDataForm:CommDataItem = {
+  sign: '',
+  pid: 0,
+  name: '',
+  sort: 0,
+  status: 0,
+  content1: '',
+  content2: '',
+  content3: '',
+}
 
 export async function commDataList(params?: CommDataParams) {
   return request('/v1/comm_data/list', {
@@ -7,14 +18,14 @@ export async function commDataList(params?: CommDataParams) {
   });
 }
 
-export async function adDelete(id: number) {
-  return request('/v1/ad/delete/'+id, {
+export async function commDataDelete(id: number) {
+  return request('/v1/comm_data/delete/'+id, {
     method: 'DELETE'
   });
 }
 
-export async function addAd(params: ProductInfoItem) {
-  return request('/v1/ad/add', {
+export async function commDatadAdd(params: CommDataItem) {
+  return request('/v1/comm_data/add', {
     method: 'POST',
     data: {
       ...params,

@@ -1,21 +1,24 @@
-export type AdItem = {
+export type CommDataItem = {
   id?: number;
+  sign: string;
+  pid: number;
   name: string;
-  type: number;
-  position: string;
   sort: number;
   status: number;
+  content1: string;
+  content2: string;
+  content3: string;
 };
 
-export type TableListPagination = {
+export type CommDataPagination = {
   total: number;
   pageSize: number;
   current: number;
 };
 
-export type TableListData = {
-  list: TableListItem[];
-  pagination: Partial<TableListPagination>;
+export type CommDataData = {
+  list: CommDataItem[];
+  pagination: Partial<CommDataPagination>;
 };
 
 export type CommDataParams = {
