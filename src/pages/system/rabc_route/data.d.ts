@@ -13,9 +13,8 @@ export type RabcRouteParams = {
   name?: string;
   desc?: string;
   key?: number;
-  pageNo?: number; 
-  pageSize?: number;
-  currentPage?: number;
+  page?: number; 
+  page_size?: number;
   filter?: Record<string, any[]>;
   sorter?: Record<string, any>;
 };

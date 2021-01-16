@@ -1,11 +1,13 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, message,Form, Input, Popconfirm, Table, Modal,Space, Card  } from 'antd';
+import { Button, message,Form, Input, Tree, Table, Modal,Space, Card  } from 'antd';
 import React from 'react';
-import type {  RabcRouteTypes } from './data.d';
-import { rabcRouteForm, rabcRouteAdd, rabcRouteDelete, rabcRouteList } from './service';
+import type {  RabcRoleTypes } from './data.d';
+import { rabcRoleForm, rabcRoleAdd, rabcRoleDelete, rabcRoleItem, rabcRoleList, rabcRoleEffective } from './service';
+import { rabcRouteList } from '../rabc_route/service';
 import { FormInstance } from 'antd/lib/form';
+import { RabcRouteParams } from '../rabc_route/data';
 
-class rabcRouteComponent extends React.Component{
+class rabcRoleComponent extends React.Component{
 
     state = {
         formValues:{},
@@ -14,6 +16,8 @@ class rabcRouteComponent extends React.Component{
             pageSize:100,
         },
         data: [],
+        treeData:[],
+        defaultCheckedKeys: ([]) as string[],
         loading: false,
         isModalVisible: false
     };
@@ -31,23 +35,21 @@ class rabcRouteComponent extends React.Component{
 
     public componentDidMount() {
         this.getList()
+        this.getRabcRouteList()
     }
-    private async getList(){
-        this.setState({ loading: true });
-        const { params } = this.state;
-        let res = await rabcRouteList(params)
-        let treeData = this.formatTree((res.data.data||[]), 0)
-        this.setState({
-            loading: false,
-            data: treeData
-        })
+
+    private async getRabcRouteList(){
+        let res = await rabcRouteList({page_size:10000} as RabcRouteParams)
+        let treeData =  this.formatTree(res.data.data||[], 0)
+        this.setState({treeData})
     }
 
     private formatTree(data:any[],pid:number){
         let arr:any[] = []
         data.forEach((v:any)=>{
             if(v.pid===pid){
-                v.key = v.id
+                v.key = v.id+''
+                v.title = v.name
                 v.children = this.formatTree(data,v.id)
                 arr.push(v)
             }
@@ -55,37 +57,55 @@ class rabcRouteComponent extends React.Component{
         return arr
     }
 
+    private async getList(){
+        this.setState({ loading: true });
+        const { params } = this.state;
+        let res = await rabcRoleList(params)
+        this.setState({
+            loading: false,
+            data: (res.data.data||[])
+        })
+    }
+
     private add(){
         this.setState({
+            defaultCheckedKeys:[],
           formValues: {},
           isModalVisible:true
         })
     }
 
-    private addChildren(item: RabcRouteTypes){
-      console.log(item) 
-      let formValues = Object.assign({}, rabcRouteForm)  
-      formValues.id = undefined
-      formValues.pid = item.id||0      
-      this.setState({
-        formValues,
-        isModalVisible:true
-      })
+    private async effective(){        
+        try {
+            const res = await rabcRoleEffective()
+            if(res.status===0){
+                message.success('操作成功')
+                this.getList()
+            }else{
+                message.error(res.message)
+            }
+            console.log(res)
+        } catch (error) {
+            console.log(error)            
+        } 
     }
 
-    private edit(item:RabcRouteTypes){
-        console.log(item)        
+    private edit(item:RabcRoleTypes){
+        console.log(item) 
+        let defaultCheckedKeys = item.route_ids.split(",")
+        
         this.setState({
+          defaultCheckedKeys,
           formValues: Object.assign({}, item),
           isModalVisible:true
         })
     }
 
-    private async save(values:RabcRouteTypes){
+    private async save(values:RabcRoleTypes){
         console.log(values)
         let form = Object.assign({}, this.state.formValues, values)
         try {
-            const res = await rabcRouteAdd(form)
+            const res = await rabcRoleAdd(form)
             if(res.status===0){
                 this.setState({isModalVisible:false})
                 message.success('保存成功')
@@ -99,10 +119,10 @@ class rabcRouteComponent extends React.Component{
         }        
     }
 
-    private async delete(values:RabcRouteTypes){
+    private async delete(values:RabcRoleTypes){
       console.log(values)
       try {
-        const res = await rabcRouteDelete(values.id||0)
+        const res = await rabcRoleDelete(values.id||0)
         if(res.status===0){
             message.success('操作成功')
             this.getList()
@@ -126,6 +146,17 @@ class rabcRouteComponent extends React.Component{
       }
     }
 
+    
+    onSelect = (e:any)=>{
+        console.log(e)
+    }
+
+    onCheck = (e:any)=>{
+        console.log(e.checked)
+        this.formRef.current?.setFieldsValue({route_ids: e.checked.join(',')})
+    }
+
+
     public render() {
           
         const columns = [
@@ -135,29 +166,9 @@ class rabcRouteComponent extends React.Component{
                 key: 'id',
             },
             {
-                title: '名称',
+                title: '角色名',
                 dataIndex: 'name',
                 key: 'name',
-            },
-            {
-                title: '路由',
-                dataIndex: 'content1',
-                key: 'content1',
-            },
-            {
-                title: '菜单',
-                dataIndex: 'content2',
-                key: 'content2',
-            },
-            {
-                title: '数据',
-                dataIndex: 'content3',
-                key: 'content3',
-            },
-            {
-                title: '排序',
-                dataIndex: 'sort',
-                key: 'sort',
             },
             {
                 title: '操作',
@@ -166,10 +177,6 @@ class rabcRouteComponent extends React.Component{
                 render: (_:any, record:any)=> (
                     <Space size="middle">
                       <a onClick={this.edit.bind(this,record)}>编辑</a>
-                      <a onClick={this.addChildren.bind(this,record)}>添加子集</a>
-                      <Popconfirm title="确定删除本条数据吗？" onConfirm={this.delete.bind(this,record)} okText="是" cancelText="否">
-                          <a>删除</a>
-                      </Popconfirm>
                     </Space>
                 )
             },
@@ -181,7 +188,10 @@ class rabcRouteComponent extends React.Component{
             <div style={{ marginBottom: 16,textAlign:'right' }}>
                 <Button type="primary" onClick={this.add}  loading={loading}>
                     <PlusOutlined />
-                    新增
+                    新增角色
+                </Button>
+                <Button type="primary" onClick={this.effective}  loading={loading} style={{marginLeft:'3px'}}>
+                    权限生效
                 </Button>
             </div>
              
@@ -191,7 +201,7 @@ class rabcRouteComponent extends React.Component{
                 columns={columns} 
                 rowKey="id"
                 loading={loading} 
-                pagination={false}
+                pagination={false}                
             />
             {isModalVisible && <Modal title="编辑" visible={isModalVisible} onOk={this.handleSubmit} onCancel={()=>{this.setState({isModalVisible:false})}}>
                 <Form
@@ -203,38 +213,24 @@ class rabcRouteComponent extends React.Component{
                     onFinish={this.save}
                     >
                     <Form.Item
-                        label="名称"
+                        label="角色名"
                         name="name"
                         rules={[{ required: true, message: '请输入名称!' }]}
                     >
                         <Input />
                     </Form.Item>
-
                     <Form.Item
-                        label="路由"
-                        name="content1"
+                        label="权限"
+                        name="route_ids"
                     >
-                        <Input />
-                    </Form.Item>
-
-                    <Form.Item
-                        label="菜单"
-                        name="content2"
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item
-                        label="数据"
-                        name="content3"
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item
-                        label="排序"
-                        name="sort"
-                        rules={[{ required: true, message: '请输入排序数字，越小越靠前!' }]}
-                    >
-                        <Input />
+                        <Tree
+                            checkable
+                            checkStrictly
+                            defaultCheckedKeys={this.state.defaultCheckedKeys}
+                            onSelect={this.onSelect}
+                            onCheck={this.onCheck}
+                            treeData={this.state.treeData}
+                            />
                     </Form.Item>
                 </Form>
             </Modal> }
@@ -243,4 +239,4 @@ class rabcRouteComponent extends React.Component{
 
 }
 
-export default rabcRouteComponent
+export default rabcRoleComponent
