@@ -62,6 +62,11 @@
                 icon: 'crown',
                 routes: [
                   {
+                    path: '/system/user/list',
+                    name: 'user.list',
+                    icon: 'smile',
+                    component: './system/user',
+                  },{
                     path: '/system/rabc_role/list',
                     name: 'rabc_role.list',
                     icon: 'smile',

@@ -150,7 +150,7 @@ class productInfoComponent extends React.Component{
     handleOk = async (event:React.MouseEvent<HTMLElement, MouseEvent>) => {
         event.preventDefault()
         try {
-          const values = await this.formRef.current.validateFields();
+          const values = await this.formRef.current?.validateFields();
           this.save(values);
         } catch (errorInfo) {
           console.log('Failed:', errorInfo);

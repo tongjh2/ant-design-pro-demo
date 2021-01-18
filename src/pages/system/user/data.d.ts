@@ -1,12 +1,8 @@
 export type UserTypes = {
   id?: number; 
   name: string;  
-  route_ids: string;
-
-  id: string;
   username: string;
   password: string;
-  name: string;
   age: string;
   sex: string;
   face: string;
@@ -22,13 +18,8 @@ export type UserTypes = {
 };
 
 export type UserParams = {
-  status?: string;
-  name?: string;
-  desc?: string;
-  key?: number;
-  pageNo?: number; 
-  pageSize?: number;
-  currentPage?: number;
+  page?: number; 
+  page_size?: number;
   filter?: Record<string, any[]>;
   sorter?: Record<string, any>;
 };
