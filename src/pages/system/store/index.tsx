@@ -1,24 +1,18 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, message,Form, Input, Select, Table, Modal,Space, Card  } from 'antd';
 import React from 'react';
-import type {  UserTypes,UserParams } from './data.d';
-import { userForm, userAdd, userDelete, userItem, userList } from './service';
+import type {  StoreTypes,StoreParams } from './data.d';
+import { storeForm, storeAdd, storeDelete, storeItem, storeList } from './service';
 import { rabcRoleList } from '../rabc_role/service';
 import { FormInstance } from 'antd/lib/form';
 import { RabcRouteParams } from '../rabc_route/data';
 import { RabcRoleTypes } from '../rabc_role/data';
-import { storeList } from '../store/service';
-import { StoreParams } from '../store/data';
+import { commDataList } from '@/pages/base/comm_data/service';
+import { CommDataParams } from '@/pages/base/comm_data/data';
+import SelectCommDataTree from "@/components/SelectCommDataTree";
 const { Option } = Select;
 
-interface DataType {
-    key: React.Key;
-    name: string;
-    age: number;
-    address: string;
-}
-
-class userComponent extends React.Component{
+class storeComponent extends React.Component{
 
     state = {
         formValues:{},
@@ -28,15 +22,15 @@ class userComponent extends React.Component{
             current: 1,
             pageSize: 10,
         },
-        storeList: [],
-        rabcRoleList:[],
-        selectedRowKeys: '',
+        storeSubjectList:[],
+        storeLocationList:[],
+        defaultCheckedKeys: ([]) as string[],
         loading: false,
         isModalVisible: false
     };
 
     
-    params:UserParams = {
+    params:StoreParams = {
         page:1,
         page_size:10,
     }
@@ -54,18 +48,18 @@ class userComponent extends React.Component{
 
     public componentDidMount() {
         this.getList()
-        this.getRabcRoleList()
-        this.geStoreList()
+        this.getStoreLocationList()
+        this.getStoreSubjectList()
     }
 
-    private async geStoreList(){
-        let res = await storeList({page_size:10000} as StoreParams)
-        this.setState({storeList: (res.data.data||[]) })
-    }
+    private async getStoreSubjectList() {
+		const res = await commDataList({page:1,page_size:100,sign:1116} as CommDataParams);
+		this.setState({storeSubjectList: (res.data.data||[]) })
+	}
 
-    private async getRabcRoleList(){
-        let res = await rabcRoleList({page_size:10000} as RabcRouteParams)
-        this.setState({rabcRoleList: (res.data.data||[]) })
+    private async getStoreLocationList(){
+        const res = await commDataList({page:1,page_size:100,sign:1115} as CommDataParams);
+        this.setState({storeLocationList: (res.data.data||[]) })
     }
 
     handleTableChange = (pagination:any, filters:any, sorter:any) => {
@@ -95,7 +89,7 @@ class userComponent extends React.Component{
 
     private async getList(){
         this.setState({ loading: true });
-        let res = await userList(this.params)
+        let res = await storeList(this.params)
         this.setState({
             loading: false,
             data: (res.data.data||[]),
@@ -109,23 +103,24 @@ class userComponent extends React.Component{
 
     private add(){
         this.setState({
+            defaultCheckedKeys:[],
           formValues: {},
           isModalVisible:true
         })
     }
 
-    private edit(item:UserTypes){        
+    private edit(item:StoreTypes){        
         this.setState({
           formValues: Object.assign({}, item),
           isModalVisible:true
         })
     }
 
-    private async save(values:UserTypes){
+    private async save(values:StoreTypes){
         console.log(values)
         let form = Object.assign({}, this.state.formValues, values)
         try {
-            const res = await userAdd(form)
+            const res = await storeAdd(form)
             if(res.status===0){
                 this.setState({isModalVisible:false})
                 message.success('保存成功')
@@ -139,10 +134,10 @@ class userComponent extends React.Component{
         }        
     }
 
-    private async delete(values:UserTypes){
+    private async delete(values:StoreTypes){
       console.log(values)
       try {
-        const res = await userDelete(values.id||0)
+        const res = await storeDelete(values.id||0)
         if(res.status===0){
             message.success('操作成功')
             this.getList()
@@ -176,16 +171,6 @@ class userComponent extends React.Component{
         this.formRef.current?.setFieldsValue({route_ids: e.checked.join(',')})
     }
 
-    changeTableRow = (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
-        this.setState({selectedRowKeys})
-        console.log(`---------------------selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-    }
-
-    updateStatus = ()=> {
-        console.log(this.state.selectedRowKeys)
-        message.success('设置用户状态成功')
-    }
-
 
     public render() {
           
@@ -196,51 +181,61 @@ class userComponent extends React.Component{
                 key: 'id',
             },
             {
-                title: '所属门店',
-                dataIndex: 'store_name',
-                key: 'store_name',
-            },
-            {
-                title: '管理门店',
-                dataIndex: 'manage_store_name',
-                key: 'manage_store_name',
-            },
-            {
-                title: '用户名',
-                dataIndex: 'username',
-                key: 'username',
-            },
-            {
-                title: '姓名',
+                title: '名称',
                 dataIndex: 'name',
                 key: 'name',
             },
             {
-                title: '手机号',
+                title: '简称',
+                dataIndex: 'small_name',
+                key: 'small_name',
+            },
+            {
+                title: '门店电话',
+                dataIndex: 'phone2',
+                key: 'phone2',
+            },
+            {
+                title: '联系电话',
                 dataIndex: 'phone',
                 key: 'phone',
             },
             {
-                title: '角色',
-                dataIndex: 'role_name',
-                key: 'role_name',
+                title: '门店经理',
+                dataIndex: 'store_manager',
+                key: 'store_manager',
             },
             {
-                title: '创建时间',
-                dataIndex: 'create_time',
-                key: 'create_time',
-                render:(_:any, record:any)=>( record.create_time.replace(/[TZ]|\+08:00/g,' ') )
+                title: '门店主体',
+                dataIndex: 'store_subject_name',
+                key: 'store_subject_name',
+            },
+            {
+                title: '地区',
+                dataIndex: 'base_location_name',
+                key: 'base_location_name',
+                render:(_:any, record:any)=>( record.province_name+' '+record.city_name )
+            },
+            {
+                title: '地址',
+                dataIndex: 'address',
+                key: 'address',
+            },
+            {
+                title: '备注',
+                dataIndex: 'remark',
+                key: 'remark',
             },
             {
                 title: '状态',
                 dataIndex: 'status',
                 key: 'status',
-                render:(_:any, record:any)=>(record.status===0?'在职':'离职')
+                render:(_:any, record:any)=>(record.status===0?'正常':'禁用')
             },
             {
                 title: '操作',
-                dataIndex: 'productState',
-                key: 'productState',
+                dataIndex: 'status',
+                key: 'status',
                 render: (_:any, record:any)=> (
                     <Space size="middle">
                       <a onClick={this.edit.bind(this,record)}>编辑</a>
@@ -263,18 +258,11 @@ class userComponent extends React.Component{
                 size="small"
                 dataSource={data} 
                 columns={columns} 
-                rowSelection={{ onChange: this.changeTableRow }}
                 rowKey="id"
                 loading={loading} 
                 pagination={pagination}  
                 onChange={this.handleTableChange}              
             />
-            <div>
-                <Button type="primary" onClick={this.updateStatus} disabled={this.state.selectedRowKeys.length==0} loading={loading}>
-                    状态设置
-                </Button>
-            </div>
-
             {isModalVisible && <Modal title="编辑" visible={isModalVisible} onOk={this.handleSubmit} onCancel={()=>{this.setState({isModalVisible:false})}}>
                 <Form
                     labelCol= {{ span: 4 }}
@@ -285,73 +273,73 @@ class userComponent extends React.Component{
                     onFinish={this.save}
                     >
                     <Form.Item
-                        label="门店"
-                        name="store_id"
-                        rules={[{ required: true, message: '请输入门店!' }]}
+                        label="门店名称"
+                        name="name"
+                        rules={[{ required: true, message: '请输入门店名称!' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        label="门店简称"
+                        name="small_name"
+                        rules={[{ required: true, message: '请输入门店简称!' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        label="门店电话"
+                        name="phone2"
+                        rules={[{ required: true, message: '请输入门店电话!' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        label="联系电话"
+                        name="phone"
+                        rules={[{ required: true, message: '请输入联系电话!' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        label="门店经理"
+                        name="store_manager"
+                        rules={[{ required: true, message: '请输入门店经理!' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        label="门店主体"
+                        name="store_subject_id"
+                        rules={[{ required: true, message: '请输入门店主体!' }]}
                     >
                         <Select showSearch allowClear>
-                            {this.state.storeList.map((v:any)=>(<Option value={v.id} key={v.id}>{v.name}</Option>))}
+                            {this.state.storeSubjectList.map((v:any)=>(<Option value={v.id} key={v.id}>{v.name}</Option>))}
                         </Select>
                     </Form.Item>
                     <Form.Item
-                        label="用户名"
-                        name="username"
-                        rules={[{ required: true, message: '请输入用户名!' }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item
-                        label="姓名"
-                        name="name"
-                        rules={[{ required: true, message: '请输入姓名!' }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item
-                        label="角色"
+                        label="地区"
                         name="role"
-                        rules={[{ required: true, message: '请选择角色!' }]}
+                        rules={[{ required: true, message: '请选择地区!' }]}
                     >
-                        <Select showSearch allowClear>
-                            {this.state.rabcRoleList.map((v:RabcRoleTypes)=>(
+                        <SelectCommDataTree></SelectCommDataTree>
+                        {/* <Select showSearch allowClear>
+                            {this.state.storeLocationList.map((v:RabcRoleTypes)=>(
                                 <Option value={v.id} key={v.id}>{v.name}</Option>
                             ))}
-                        </Select>
-                    </Form.Item>
-                    <Form.Item
-                        label="电话"
-                        name="phone"
-                        rules={[{ required: true, message: '请输入电话!' }]}
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item
-                        label="年龄"
-                        name="age"
-                    >
-                        <Input />
-                    </Form.Item>
-                    <Form.Item
-                        label="性别"
-                        name="sex"
-                    >
-                        <Select showSearch allowClear>
-                            <Option value={1}>男</Option>
-                            <Option value={2}>女</Option>
-                            <Option value={0}>未知</Option>
-                        </Select>
-                    </Form.Item>
-                    <Form.Item
-                        label="工龄"
-                        name="gong_ling"
-                    >
-                        <Input />
+                        </Select> */}
                     </Form.Item>
                     <Form.Item
                         label="地址"
                         name="address"
+                        rules={[{ required: true, message: '请选择地址!' }]}
                     >
                         <Input />
+                    </Form.Item>  
+                    <Form.Item
+                        label="备注"
+                        name="remark"
+                    >
+                        <Input.TextArea />
                     </Form.Item>                    
                 </Form>
             </Modal> }
@@ -360,4 +348,4 @@ class userComponent extends React.Component{
 
 }
 
-export default userComponent
+export default storeComponent

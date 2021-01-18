@@ -48,7 +48,7 @@ class productInfoComponent extends React.Component{
     }
 
     public componentDidMount() {
-        this.getAdList()
+        this.getList()
     }
 
     handleTableChange = (pagination:any, filters:any, sorter:any) => {
@@ -59,16 +59,16 @@ class productInfoComponent extends React.Component{
           ...filters,
         });
         this.state.params.pageNo = pagination.current        
-        this.getAdList()
+        this.getList()
       };
 
     search = (values:any)=>{
         this.state.params = Object.assign(this.state.params,values)
         this.state.params.pageNo = 1
-        this.getAdList()
+        this.getList()
     }
 
-    private async getAdList(){
+    private async getList(){
         this.setState({ loading: true });
         const { params } = this.state;
         let res = await adList(params)
@@ -134,7 +134,7 @@ class productInfoComponent extends React.Component{
             if(res.status===0){
                 this.setState({isModalVisible:false})
                 message.success('保存成功')
-                this.getAdList()
+                this.getList()
             }else{
                 message.error(res.message)
             }
@@ -162,7 +162,7 @@ class productInfoComponent extends React.Component{
         try { 
             await adDelete(item.id||0);
             message.success('操作成功')
-            this.getAdList()
+            this.getList()
         } catch (errorInfo) {
             console.log('Failed:', errorInfo);
             message.warn('操作失败')

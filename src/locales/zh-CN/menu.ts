@@ -55,6 +55,7 @@ export default {
   'menu.base': '基础数据',
   
   'menu.system': '系统设置',
+  'menu.system.store.list': '门店管理',
   'menu.system.user.list': '用户管理',
   'menu.system.rabc_role.list': '角色管理',
   'menu.system.rabc_route.list': '权限管理',

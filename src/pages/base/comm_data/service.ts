@@ -1,7 +1,7 @@
 import request from '@/utils/request';
-import type { CommDataParams, CommDataItem } from './data.d';
+import type { CommDataParams, CommDataTypes } from './data.d';
 
-export let commDataForm:CommDataItem = {
+export let commDataForm:CommDataTypes = {
   sign: '',
   pid: 0,
   name: '',
@@ -24,7 +24,7 @@ export async function commDataDelete(id: number) {
   });
 }
 
-export async function commDatadAdd(params: CommDataItem) {
+export async function commDatadAdd(params: CommDataTypes) {
   return request('/v1/comm_data/add', {
     method: 'POST',
     data: {

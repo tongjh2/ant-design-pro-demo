@@ -1,7 +1,7 @@
 import { PlusOutlined, UploadOutlined, InboxOutlined } from '@ant-design/icons';
 import { Button, message, Form, Input, Select, Table, Modal,Space,Popconfirm,Card,Row, Col,Upload, Breadcrumb    } from 'antd';
 import React from 'react';
-import type { CommDataItem } from './data.d';
+import type { CommDataTypes } from './data.d';
 import { commDataList, commDatadAdd, commDataDelete } from './service';
 import { FormInstance } from 'antd/lib/form';
 const { Option } = Select;

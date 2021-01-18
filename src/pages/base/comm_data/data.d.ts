@@ -1,4 +1,4 @@
-export type CommDataItem = {
+export type CommDataTypes = {
   id?: number;
   sign: string;
   pid: number;
@@ -17,7 +17,7 @@ export type CommDataPagination = {
 };
 
 export type CommDataData = {
-  list: CommDataItem[];
+  list: CommDataTypes[];
   pagination: Partial<CommDataPagination>;
 };
 
