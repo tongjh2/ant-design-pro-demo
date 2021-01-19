@@ -213,6 +213,11 @@
                     name: 'action_log.list',
                     icon: 'smile',
                     component: './log/action_log',
+                  },{
+                    path: '/log/login_log/list',
+                    name: 'login_log.list',
+                    icon: 'smile',
+                    component: './log/login_log',
                   },
                 ],
               },

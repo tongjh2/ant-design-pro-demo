@@ -1,8 +1,8 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { Table, Button, message, Space, Popconfirm, Modal,Form, Input, Select,Card,Upload, DatePicker  } from 'antd';
 import React, { useState, useEffect } from 'react';
-import type { ActionLogTypes,ActionLogPagination,ActionLogParams } from './data.d';
-import { actionLogForm,actionLogParams,actionLogList, actionLogUpdateStatus, actionLogAdd, actionLogDelete } from './service';
+import type { LoginLogTypes,LoginLogPagination,LoginLogParams } from './data.d';
+import { loginLogForm,loginLogParams,loginLogList, loginLogUpdateStatus, loginLogAdd, loginLogDelete } from './service';
 import { commDataList } from '../../base/comm_data/service';
 import { CommDataParams } from '../../base/comm_data/data.d';
 import { cloneDeep } from "lodash";
@@ -11,15 +11,15 @@ const { RangePicker } = DatePicker;
 import EditorDemo from '@/components/EditorDemo'
 
 
-const ActionLog: React.FC = () => {
+const LoginLog: React.FC = () => {
 
   const [modalVisible, handleModalVisible] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [currentRow, setCurrentRow] = useState<ActionLogTypes>(cloneDeep(actionLogForm));
-  const [selectedRowsState, setSelectedRows] = useState<ActionLogTypes[]>([]);
-  const [pagination, setPagination] = useState<ActionLogPagination>();
+  const [currentRow, setCurrentRow] = useState<LoginLogTypes>(cloneDeep(loginLogForm));
+  const [selectedRowsState, setSelectedRows] = useState<LoginLogTypes[]>([]);
+  const [pagination, setPagination] = useState<LoginLogPagination>();
 
 
   const [previewVisible, setPreviewVisible] = useState<boolean>(false);
@@ -33,7 +33,7 @@ const ActionLog: React.FC = () => {
 		getList() 
 	},[])
 
-	let params:ActionLogParams = cloneDeep(actionLogParams)
+	let params:LoginLogParams = cloneDeep(loginLogParams)
 
 	const handleTableChange = (pagination:any, filters:any, sorter:any) => {
         console.log({
@@ -49,7 +49,7 @@ const ActionLog: React.FC = () => {
 
 	const getList = async()=>{
 		setLoading(true)
-		let res = await actionLogList(params)
+		let res = await loginLogList(params)
 		setSelectedRows(res.data.data)
 		setPagination({
 			total:res.data.pagenation.total,
@@ -184,4 +184,4 @@ const ActionLog: React.FC = () => {
   );
 };
 
-export default ActionLog;
+export default LoginLog;
