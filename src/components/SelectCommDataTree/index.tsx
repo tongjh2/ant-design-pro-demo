@@ -5,21 +5,32 @@ import { Select } from "antd"
 import { useEffect, useState } from "react";
 const { Option } = Select;
 
+type CommDataProps = {
+    sign: string;
+    defaultValue:number|string;
+    onChange: (value: number, formVals?: any) => void;
+  };
 
-const SelectCommDataTree: React.FC = () => {
+const SelectCommDataTree: React.FC<CommDataProps> = (props) => {
+
+    const {
+        sign,
+        defaultValue
+    } = props;
 
     
   const [storeLocationList, setStoreLocationList] = useState<any[]>([]);
 
     useEffect(()=>{
 		console.log("第一次渲染select-comm-data-tree");
+		console.log(props.sign,sign);
 		getStoreLocationList()
     },[])
     
     
 
     const getStoreLocationList = async() => {
-        const res = await commDataList({page:1,page_size:100,sign:1115} as CommDataParams);
+        const res = await commDataList({page:1,page_size:100,sign:sign} as CommDataParams);
         let list = formatTree(res.data.data||[], 0) 
         console.log( list )
         setStoreLocationList(list)
@@ -58,8 +69,30 @@ const SelectCommDataTree: React.FC = () => {
         return level;
     }
 
+    const onChange = (value:number,option: any) =>{
+        let list = []
+        if(value){
+            list = getChildren(value)
+            list.reverse()
+        }
+        props.onChange(value,list)
+    }
+
+    const getChildren = (pid:number) => {
+        let arr = []
+        let [item] = storeLocationList.filter(v=>v.id==pid)
+        if(item){
+            arr.push(item)
+            let children:any[] = getChildren(item.pid)
+            if(children.length>0){
+                arr = arr.concat(children)
+            }
+        }
+        return arr
+    }
+
     return (
-        <Select showSearch allowClear>
+        <Select onChange={onChange} defaultValue={defaultValue} showSearch allowClear>
             {storeLocationList.map((v:any)=>(
                 <Option value={v.id} key={v.id}>{v.name2}</Option>
             ))}
@@ -68,4 +101,4 @@ const SelectCommDataTree: React.FC = () => {
     )
 }
 
-export default SelectCommDataTree
+export default SelectCommDataTree // Authorized //

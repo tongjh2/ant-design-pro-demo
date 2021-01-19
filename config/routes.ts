@@ -81,17 +81,22 @@
                     name: 'rabc_route.list',
                     icon: 'smile',
                     component: './system/rabc_route',
-                  },{
-                    path: '/system/ad/list',
-                    name: 'ad.list',
-                    icon: 'smile',
-                    component: './system/ad',
                   },
                   {
                     name: 'explain_post.list',
                     icon: 'table',
                     path: '/system/explain_post/list',
                     component: './system/explain_post',
+                  },{
+                    path: '/system/ad/list',
+                    name: 'ad.list',
+                    icon: 'smile',
+                    component: './system/ad',
+                  },{
+                    path: '/system/feedback/list',
+                    name: 'feedback.list',
+                    icon: 'smile',
+                    component: './system/feedback',
                   },
                 ],
               },
@@ -196,6 +201,18 @@
                     name: 'comm_data.list.3210',
                     icon: 'smile',
                     component: './base/comm_data',
+                  },
+                ],
+              },{
+                path: '/log',
+                name: 'log',
+                icon: 'crown',
+                routes: [
+                  {
+                    path: '/log/action_log/list',
+                    name: 'action_log.list',
+                    icon: 'smile',
+                    component: './log/action_log',
                   },
                 ],
               },

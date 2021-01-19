@@ -49,19 +49,17 @@ export default {
   'menu.editor.flow': '流程编辑器',
   'menu.editor.mind': '脑图编辑器',
   'menu.editor.koni': '拓扑编辑器',
-
-  'menu.warehouseInfo.list': '仓库管理',
-  'menu.base.invoiceClause.list': '发票项目管理',
-  'menu.base': '基础数据',
   
   'menu.system': '系统设置',
   'menu.system.store.list': '门店管理',
   'menu.system.user.list': '用户管理',
   'menu.system.rabc_role.list': '角色管理',
   'menu.system.rabc_route.list': '权限管理',
-  'menu.system.ad.list': '广告管理',
   'menu.system.explain_post.list': '讲解管理',
+  'menu.system.ad.list': '广告管理',
+  'menu.system.feedback.list': '反馈建议',
 
+  'menu.base': '基础数据',
   'menu.base.comm_data.list.1115': '门店地区',
   'menu.base.comm_data.list.1112': '信息来源',
   'menu.base.comm_data.list.1114': '地域来源',
@@ -81,4 +79,8 @@ export default {
   'menu.base.comm_data.list.3113': '患者分类',
   'menu.base.comm_data.list.3114': '回访结果',
   'menu.base.comm_data.list.3210': '预约标签',
+
+  'menu.log': '日志管理',
+  'menu.log.action_log.list': '操作日志',
+  'menu.log.login_log.list': '登录日志',
 };

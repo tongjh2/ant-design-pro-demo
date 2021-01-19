@@ -24,6 +24,7 @@ class storeComponent extends React.Component{
         },
         storeSubjectList:[],
         storeLocationList:[],
+        defaultSelectedKey: '',
         defaultCheckedKeys: ([]) as string[],
         loading: false,
         isModalVisible: false
@@ -109,10 +110,12 @@ class storeComponent extends React.Component{
         })
     }
 
-    private edit(item:StoreTypes){        
+    private edit(item:StoreTypes){   
+        console.log( item.city_id||item.province_id )     
         this.setState({
-          formValues: Object.assign({}, item),
-          isModalVisible:true
+            defaultSelectedKey: item.city_id||item.province_id,
+            formValues: Object.assign({}, item),
+            isModalVisible:true
         })
     }
 
@@ -169,6 +172,27 @@ class storeComponent extends React.Component{
     onCheck = (e:any)=>{
         console.log(e.checked)
         this.formRef.current?.setFieldsValue({route_ids: e.checked.join(',')})
+    }
+
+    changeLocation = (value:number,list:any[])=>{
+        console.log(value, list)
+        let form = {
+            province_id: '',
+            province_name: '',
+            city_id: '',
+            city_name: '',
+        }
+        if(list.length>0){
+            form.province_id = list[0].id
+            form.province_name = list[0].name
+        }
+        if(list.length>1){
+            form.city_id = list[1].id
+            form.city_name = list[1].name
+        }
+        console.log( form )
+        let formValues = Object.assign({},this.state.formValues,form)
+        this.setState({ formValues })
     }
 
 
@@ -318,15 +342,11 @@ class storeComponent extends React.Component{
                     </Form.Item>
                     <Form.Item
                         label="地区"
-                        name="role"
+                        name="province_id"
                         rules={[{ required: true, message: '请选择地区!' }]}
                     >
-                        <SelectCommDataTree></SelectCommDataTree>
-                        {/* <Select showSearch allowClear>
-                            {this.state.storeLocationList.map((v:RabcRoleTypes)=>(
-                                <Option value={v.id} key={v.id}>{v.name}</Option>
-                            ))}
-                        </Select> */}
+                        <SelectCommDataTree sign="1115" defaultValue={this.state.defaultSelectedKey} onChange={this.changeLocation}></SelectCommDataTree>
+                       
                     </Form.Item>
                     <Form.Item
                         label="地址"
