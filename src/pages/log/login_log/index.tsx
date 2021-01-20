@@ -50,6 +50,7 @@ const LoginLog: React.FC = () => {
 	const getList = async()=>{
 		setLoading(true)
 		let res = await loginLogList(params)
+
 		setSelectedRows(res.data.data)
 		setPagination({
 			total:res.data.pagenation.total,
@@ -68,23 +69,38 @@ const LoginLog: React.FC = () => {
 		{
 			title: 'ID',
 			dataIndex: 'id',
-			key: 'id',
-			width: 90
+			key: 'id'
+		},
+		{
+			title: '类型',
+			dataIndex: 'login_type',
+			key: 'login_type',
+			render:(_:any, record:any)=>(
+				record.type===0?'前台登录':record.type===1?'后台登录':record.type===2?'HTTP请求':'未知'
+			)
 		},
 		{
 			title: '时间',
 			dataIndex: 'create_time',
 			key: 'create_time',
-			width: 150,
 			render:(_:any, record:any)=>(
 				record.create_time.replace(/T|\+08:00/g,' ')
 			)
 		},
 		{
+			title: 'IP',
+			dataIndex: 'source_ip',
+			key: 'source_ip'
+		},
+		{
+			title: '系统',
+			dataIndex: 'user_agent',
+			key: 'user_agent'
+		},
+		{
 			title: '用户',
 			dataIndex: 'user_name',
-			key: 'user_name',
-			width: 100
+			key: 'user_name'
 		},
 		{
 			title: '内容',
@@ -100,17 +116,24 @@ const LoginLog: React.FC = () => {
 				name="advanced_search"
 				className="ant-advanced-search-form"
 				onFinish={(values)=>{
-					console.log(values)
 					params = Object.assign({},params,values,{page:1})
-					console.log(params)
 					getList()
 				}}
 				>
-				<Form.Item name="user_name" label="用户">
+				<Form.Item name="user_name" label="登录用户">
 					<Input allowClear />
 				</Form.Item>
-				<Form.Item name="q" label="内容">
+				<Form.Item name="type" label="登录类型">
+					<Select showSearch allowClear style={{ width: 180 }}>
+						<Option value="0">前台登陆</Option>
+						<Option value="1">后台登陆</Option>
+					</Select>
+				</Form.Item>
+				<Form.Item name="source_ip" label="登录IP">
 					<Input allowClear />
+				</Form.Item>
+				<Form.Item label="登录时间">
+					<RangePicker format={'YYYY-MM-DD'} onChange={changeDate} />
 				</Form.Item>
 				<Form.Item>
 					<Button type="primary" htmlType="submit">搜索</Button>

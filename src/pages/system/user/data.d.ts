@@ -18,6 +18,13 @@ export type UserTypes = {
 };
 
 export type UserParams = {
+  store_id?:number;
+  q?:string;
+  phone?:string;
+  role?:number;
+  status?:number;
+  start_time?:string;
+  end_time?:string;
   page?: number; 
   page_size?: number;
   filter?: Record<string, any[]>;

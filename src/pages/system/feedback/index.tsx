@@ -106,9 +106,7 @@ const Feedback: React.FC = () => {
 				name="advanced_search"
 				className="ant-advanced-search-form"
 				onFinish={(values)=>{
-					console.log(values)
 					params = Object.assign({},params,values,{page:1})
-					console.log(params)
 					getList()
 				}}
 				>
@@ -160,16 +158,17 @@ const Feedback: React.FC = () => {
 				</Form.Item>
 				<Form.Item
 					label="图片附件"
-					name="image"
 				>
+					<Form.Item name="image">
 					{currentRow.image && <div className="image-items">
-						{currentRow.image.split(',').map((v:string)=>(
-							<div className="item-image"><img src={v} key={v} onClick={()=>{
+						{currentRow.image.split(',').map((v:string,index:number)=>(
+							<div className="item-image" key={index}><img src={v} onClick={()=>{
 								setPreviewVisible(true)
 								setPreviewImage(v)
 							}} /></div>
 						))}
 					</div>}
+					</Form.Item>
 					
 					<Modal
 					visible={previewVisible}

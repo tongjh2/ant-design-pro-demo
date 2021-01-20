@@ -7,8 +7,10 @@ export type LoginLogTypes = {
 };
 
 export type LoginLogParams = {
-  q?:string;
-  start_time?:number|string;
+  user_name?:string;
+  type?:string;
+  source_ip?:string;
+  start_time?:string;
   end_time?:string;
   page:number;
   page_size:number;

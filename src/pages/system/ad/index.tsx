@@ -1,4 +1,4 @@
-import { PlusOutlined, UploadOutlined, InboxOutlined } from '@ant-design/icons';
+import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import { Button, message, Form, Input, Select, Table, Modal,Space,Popconfirm,Card,Row, Col,Upload   } from 'antd';
 import React from 'react';
 import type { AdItem } from './data.d';

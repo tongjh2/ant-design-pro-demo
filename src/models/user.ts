@@ -60,6 +60,11 @@ const UserModel: UserModelType = {
 
   reducers: {
     saveCurrentUser(state, action) {
+      let currentUser = action.payload || {}
+      if(!currentUser.avatar){
+        currentUser.avatar = require("@/assets/face.png")
+      }
+
       return {
         ...state,
         currentUser: action.payload || {},

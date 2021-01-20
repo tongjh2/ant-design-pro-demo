@@ -1,8 +1,8 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, message,Form, Input, Select, Table, Modal,Space, Card  } from 'antd';
+import { Button, message,Form, Input, Select, Table, Modal,Space, Card, DatePicker  } from 'antd';
 import React from 'react';
 import type {  UserTypes,UserParams } from './data.d';
-import { userForm, userAdd, userDelete, userItem, userList } from './service';
+import { userForm, userAdd, userDelete, userItem, userList, userUpdateStatus } from './service';
 import { rabcRoleList } from '../rabc_role/service';
 import { FormInstance } from 'antd/lib/form';
 import { RabcRouteParams } from '../rabc_route/data';
@@ -10,6 +10,7 @@ import { RabcRoleTypes } from '../rabc_role/data';
 import { storeList } from '../store/service';
 import { StoreParams } from '../store/data';
 const { Option } = Select;
+const { RangePicker } = DatePicker;
 
 interface DataType {
     key: React.Key;
@@ -30,9 +31,10 @@ class userComponent extends React.Component{
         },
         storeList: [],
         rabcRoleList:[],
-        selectedRowKeys: '',
+        selectedRowKeys: [],
         loading: false,
-        isModalVisible: false
+        isModalVisible: false,
+        isUpdateStatus: false,        
     };
 
     
@@ -42,6 +44,7 @@ class userComponent extends React.Component{
     }
 
     formRef  = React.createRef<FormInstance>()   
+    formRefUpdateStatus  = React.createRef<FormInstance>()   
 
     constructor(props:any) {
         super(props);
@@ -181,10 +184,37 @@ class userComponent extends React.Component{
         console.log(`---------------------selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
     }
 
-    updateStatus = ()=> {
+    updateStatus = async()=> {
         console.log(this.state.selectedRowKeys)
-        message.success('设置用户状态成功')
+        try {
+            const values = await this.formRefUpdateStatus.current?.validateFields();
+            this.updateStatusSubmit(values);
+        } catch (errorInfo) {
+            console.log('Failed:', errorInfo);
+        }
     }
+
+    updateStatusSubmit = async(values:any)=>{
+        console.log(values)
+        try {
+            await userUpdateStatus(this.state.selectedRowKeys.join(',') ,values.status)
+            message.success('操作成功')
+            this.setState({isUpdateStatus:false})
+            this.getList()
+        } catch (error) {
+            message.error('操作失败'+error.message)
+        }
+    }
+
+    search = (values:any)=>{
+        this.params = Object.assign({},this.params,values,{page:1})
+        this.getList()
+    }
+
+    changeDate = (e:any,date:string[])=>{
+		this.params.start_time = date[0];
+		this.params.end_time = date[1];
+	}
 
 
     public render() {
@@ -249,18 +279,56 @@ class userComponent extends React.Component{
             },
         ];
 
-        const { formValues, data, pagination, loading, isModalVisible } = this.state; 
+        const { formValues, data, pagination, loading, isModalVisible, isUpdateStatus } = this.state; 
 
-        return <Card size="small" style={{ width: '100%',marginBottom:16 }}>
-            <div style={{ marginBottom: 16,textAlign:'right' }}>
-                <Button type="primary" onClick={this.add}  loading={loading}>
-                    <PlusOutlined />
-                    新增
-                </Button>
-            </div>
+        return <Card size="small" hoverable style={{ width: '100%',marginBottom:16 }}>
+                    <Form layout="inline"
+                    name="advanced_search"
+                    className="ant-advanced-search-form"
+                    style={{marginBottom:15}}
+                    onFinish={this.search}
+                    >
+                    <Form.Item name="store_id" label="门店">
+                        <Select showSearch allowClear style={{width:180}}>
+                            {this.state.storeList.map((v:any)=>(<Option value={v.id} key={v.id}>{v.name}</Option>))}
+                        </Select>
+                    </Form.Item>
+                    <Form.Item name="q" label="姓名">
+                        <Input />
+                    </Form.Item>
+                    <Form.Item name="phone" label="手机号">
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label="发布时间">
+                        <RangePicker format={'YYYY-MM-DD'} onChange={this.changeDate} />
+                    </Form.Item>
+                    <Form.Item name="role" label="角色">
+                        <Select showSearch allowClear style={{width:180}}>
+                            {this.state.rabcRoleList.map((v:RabcRoleTypes)=>(
+                                <Option value={v.id+''} key={v.id}>{v.name}</Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                    <Form.Item name="status" label="状态">
+                        <Select showSearch allowClear style={{width:180}}>
+                            <Option value={1}>离职</Option>
+                            <Option value={0}>在职</Option>
+                        </Select>
+                    </Form.Item>
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit">搜索</Button>
+                    </Form.Item>
+                    <Form.Item style={{width:300,flex:1,textAlign:'right'}}>
+                        <Button type="primary" onClick={this.add}  loading={loading} style={{marginLeft:'3px'}}>
+                            <PlusOutlined />
+                            新增
+                        </Button>
+                    </Form.Item>
+                </Form>
              
             <Table 
                 size="small"
+                bordered
                 dataSource={data} 
                 columns={columns} 
                 rowSelection={{ onChange: this.changeTableRow }}
@@ -269,8 +337,8 @@ class userComponent extends React.Component{
                 pagination={pagination}  
                 onChange={this.handleTableChange}              
             />
-            <div>
-                <Button type="primary" onClick={this.updateStatus} disabled={this.state.selectedRowKeys.length==0} loading={loading}>
+            <div style={{ width:200, marginTop: -40}}>
+                <Button type="primary" onClick={()=>{ this.setState({isUpdateStatus:true}) }} disabled={this.state.selectedRowKeys.length==0} loading={loading}>
                     状态设置
                 </Button>
             </div>
@@ -355,6 +423,25 @@ class userComponent extends React.Component{
                     </Form.Item>                    
                 </Form>
             </Modal> }
+
+
+            {isUpdateStatus && <Modal title="编辑" visible={isUpdateStatus} onOk={this.updateStatus} onCancel={()=>{this.setState({isUpdateStatus:false})}}>
+                <Form
+                    labelCol= {{ span: 4 }}
+                    wrapperCol= {{ span: 20 }}
+                    name="form"
+                    ref={this.formRefUpdateStatus}
+                    onFinish={this.updateStatus}
+                    >                   
+                    <Form.Item label="状态" name="status" rules={[{ required: true, message: '请选择状态!' }]}>
+                        <Select showSearch allowClear>
+                            <Option value={1}>离职</Option>
+                            <Option value={0}>在职</Option>
+                        </Select>
+                    </Form.Item>                   
+                </Form>
+            </Modal> }
+
         </Card>;
     }
 

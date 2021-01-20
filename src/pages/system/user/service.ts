@@ -3,7 +3,6 @@ import type { UserParams, UserTypes } from './data.d';
 
 export let userForm:UserTypes = {
   name: '',  
-  route_ids: '',  
 }
 
 export async function userAdd(params: UserTypes) {
@@ -33,5 +32,20 @@ export async function userItem(id: number) {
 export async function userList(params?: UserParams) {
   return request('/v1/user/list', {
     params,
+  });
+}
+
+export async function userUpdateStatus(id:string, status:number) {
+  return request('/v1/user/update_status', {
+    method: 'PUT',
+    data: {
+      id,
+      status,
+      method: 'put',
+    },
+    requestType: 'form',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
   });
 }

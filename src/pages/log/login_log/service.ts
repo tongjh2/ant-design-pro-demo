@@ -10,7 +10,9 @@ export const loginLogForm:LoginLogTypes = {
 }
 
 export const loginLogParams:LoginLogParams = {
-  q:'',
+  user_name:'',
+  type:'',
+  source_ip:'',
   start_time:'', 
   end_time:'', 
   page:1,
