@@ -1,14 +1,9 @@
-import { PlusOutlined } from '@ant-design/icons';
-import { Table, Button, message, Space, Popconfirm, Modal,Form, Input, Select,Card,Upload, DatePicker  } from 'antd';
+import { Table, Button,  Modal,Form, Input, Card  } from 'antd';
 import React, { useState, useEffect } from 'react';
 import type { ActionLogTypes,ActionLogPagination,ActionLogParams } from './data.d';
-import { actionLogForm,actionLogParams,actionLogList, actionLogUpdateStatus, actionLogAdd, actionLogDelete } from './service';
-import { commDataList } from '../../base/comm_data/service';
-import { CommDataParams } from '../../base/comm_data/data.d';
+import { actionLogForm,actionLogParams,actionLogList } from './service';
 import { cloneDeep } from "lodash";
-const { Option } = Select;
-const { RangePicker } = DatePicker;
-import EditorDemo from '@/components/EditorDemo'
+import { PageContainer } from '@ant-design/pro-layout';
 
 
 const ActionLog: React.FC = () => {
@@ -93,12 +88,11 @@ const ActionLog: React.FC = () => {
 		}
 	];
 
-  return (
-    <div>
-		<Card size="small" style={{ width: '100%',marginBottom:16 }}>
+  return (<PageContainer><Card size="small" hoverable style={{ width: '100%',marginBottom:16 }}>
 			<Form layout="inline"
 				name="advanced_search"
 				className="ant-advanced-search-form"
+				style={{ marginBottom:15 }}
 				onFinish={(values)=>{
 					console.log(values)
 					params = Object.assign({},params,values,{page:1})
@@ -116,10 +110,10 @@ const ActionLog: React.FC = () => {
 					<Button type="primary" htmlType="submit">搜索</Button>
 				</Form.Item>
 			</Form>
-		</Card>
 
 		<Table 
 			size="small"
+			bordered
 			dataSource={selectedRowsState} 
 			columns={columns} 
 			rowKey="id"
@@ -179,8 +173,9 @@ const ActionLog: React.FC = () => {
 				</Form.Item>				
 			</Form>
 		</Modal>}
-          
-    </div>
+
+	</Card>
+	</PageContainer>
   );
 };
 

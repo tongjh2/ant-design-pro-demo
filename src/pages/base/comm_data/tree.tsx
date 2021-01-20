@@ -344,19 +344,18 @@ class commDataTreeComponent extends React.Component{
 
         const { formValues, data, pagination, loading, isModalVisible,treeData } = this.state; 
 
-        return <div>
-            
-            <Card size="small" style={{ width: '100%',marginBottom:16 }}>
-                <div style={{paddingBottom:"15px"}}>
+        return <Card size="small" hoverable style={{ width: '100%',marginBottom:16 }}>
+                {/* <div style={{paddingBottom:"15px"}}>
                     <Breadcrumb>
                         <Breadcrumb.Item>首页</Breadcrumb.Item>
                         <Breadcrumb.Item><a href="">基础数据</a></Breadcrumb.Item>
                         <Breadcrumb.Item>信息来源</Breadcrumb.Item>
                     </Breadcrumb>
-                </div>
+                </div> */}
                 <Form layout="inline"
                     name="advanced_search"
                     className="ant-advanced-search-form"
+                    style={{ marginBottom:15 }}
                     onFinish={this.search}
                     >
                     <Form.Item name="position" label="位置">
@@ -380,7 +379,6 @@ class commDataTreeComponent extends React.Component{
                         </Button>
                     </Form.Item>
                 </Form>
-            </Card>
 
             <div style={{padding:'15px',background:'#fff'}}>
                 <Tree
@@ -474,7 +472,7 @@ class commDataTreeComponent extends React.Component{
                     </Form.Item> */}
                 </Form>
             </Modal>}
-        </div>;
+        </Card>;
     }
 
 

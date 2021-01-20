@@ -299,9 +299,6 @@ class userComponent extends React.Component{
                     <Form.Item name="phone" label="手机号">
                         <Input />
                     </Form.Item>
-                    <Form.Item label="发布时间">
-                        <RangePicker format={'YYYY-MM-DD'} onChange={this.changeDate} />
-                    </Form.Item>
                     <Form.Item name="role" label="角色">
                         <Select showSearch allowClear style={{width:180}}>
                             {this.state.rabcRoleList.map((v:RabcRoleTypes)=>(
@@ -315,6 +312,9 @@ class userComponent extends React.Component{
                             <Option value={0}>在职</Option>
                         </Select>
                     </Form.Item>
+                    {/* <Form.Item label="创建日期">
+                        <RangePicker format={'YYYY-MM-DD'} onChange={this.changeDate} />
+                    </Form.Item> */}
                     <Form.Item>
                         <Button type="primary" htmlType="submit">搜索</Button>
                     </Form.Item>

@@ -184,7 +184,7 @@ class rabcRoleComponent extends React.Component{
 
         const { formValues, data, loading, isModalVisible } = this.state; 
 
-        return <Card size="small" style={{ width: '100%',marginBottom:16 }}>
+        return <Card size="small" hoverable style={{ width: '100%',marginBottom:16 }}>
             <div style={{ marginBottom: 16,textAlign:'right' }}>
                 <Button type="primary" onClick={this.add}  loading={loading}>
                     <PlusOutlined />
@@ -197,6 +197,7 @@ class rabcRoleComponent extends React.Component{
              
             <Table 
                 size="small"
+                bordered
                 dataSource={data} 
                 columns={columns} 
                 rowKey="id"

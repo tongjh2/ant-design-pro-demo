@@ -99,12 +99,11 @@ const Feedback: React.FC = () => {
 		},
 	];
 
-  return (
-    <div>
-		<Card size="small" style={{ width: '100%',marginBottom:16 }}>
+  return (<Card size="small" hoverable style={{ width: '100%',marginBottom:16 }}>
 			<Form layout="inline"
 				name="advanced_search"
 				className="ant-advanced-search-form"
+				style={{marginBottom:15}}
 				onFinish={(values)=>{
 					params = Object.assign({},params,values,{page:1})
 					getList()
@@ -120,10 +119,10 @@ const Feedback: React.FC = () => {
 					<Button type="primary" htmlType="submit">搜索</Button>
 				</Form.Item>
 			</Form>
-		</Card>
 
 		<Table 
 			size="small"
+			bordered
 			dataSource={selectedRowsState} 
 			columns={columns} 
 			rowKey="id"
@@ -183,9 +182,8 @@ const Feedback: React.FC = () => {
 					</Modal>
 				</Form.Item>				
 			</Form>
-		</Modal>}
-          
-    </div>
+		</Modal>}          
+	</Card>
   );
 };
 

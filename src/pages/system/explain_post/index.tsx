@@ -214,12 +214,11 @@ const ExplainPost: React.FC = () => {
 		},
 	];
 
-  return (
-    <div>
-		<Card size="small" style={{ width: '100%',marginBottom:16 }}>
+  return (<Card size="small" hoverable style={{ width: '100%',marginBottom:16 }}>
 			<Form layout="inline"
 				name="advanced_search"
 				className="ant-advanced-search-form"
+				style={{marginBottom:15}}
 				onFinish={(values)=>{
 					console.log(values)
 					params = Object.assign({},params,values,{page:1})
@@ -259,10 +258,10 @@ const ExplainPost: React.FC = () => {
 					</Button>
 				</Form.Item>
 			</Form>
-		</Card>
 
 		<Table 
 			size="small"
+			bordered
 			dataSource={selectedRowsState} 
 			columns={columns} 
 			rowKey="id"
@@ -364,8 +363,7 @@ const ExplainPost: React.FC = () => {
 				</Form.Item>
 			</Form>
 		</Modal>}
-          
-    </div>
+	</Card>
   );
 };
 
