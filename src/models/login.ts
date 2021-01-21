@@ -87,6 +87,7 @@ const Model: LoginModelType = {
 
     logout() {
       const { redirect } = getPageQuery();
+      localStorage.removeItem('Authorization')
       // Note: There may be security issues, please note      
       if (window.location.pathname !== '/user/login' && !redirect) {
         history.replace({

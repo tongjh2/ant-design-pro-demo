@@ -64,6 +64,12 @@ const request = extend({
 
 // request拦截器, 改变url 或 options.
 request.interceptors.request.use((url, options) => {
+    let Authorization = localStorage.getItem('Authorization')||''
+  if(options.headers.Authorization){
+    options.headers = {
+      'Authorization': Authorization
+    }
+  }
   if(options.method=='post'){
     const headers = {
       'Authorization': Authorization,
