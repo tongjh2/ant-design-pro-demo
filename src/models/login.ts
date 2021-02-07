@@ -42,6 +42,7 @@ const Model: LoginModelType = {
 
       console.log(payload, response)
       if(response.status===0){
+        localStorage.setItem('Authorization', response.data.Authorization);
         message.success('🎉  登录成功！')
         const urlParams = new URL(window.location.href);
         const params = getPageQuery();

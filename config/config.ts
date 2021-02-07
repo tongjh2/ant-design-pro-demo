@@ -13,7 +13,7 @@ export default defineConfig({
     hmr: true,
   },
   history: {
-    type: 'browser',
+    type: 'hash' //'browser',
   },
   locale: {
     // default zh-CN
@@ -40,7 +40,7 @@ export default defineConfig({
   manifest: {
     basePath: '/',
   },
-  // base:'./',
-  // publicPath:'./',
+  // base:'/jeeapp/static/frontend/dist/',
+  // publicPath:'/jeeapp/static/frontend/dist/',
   esbuild: {},
 });
